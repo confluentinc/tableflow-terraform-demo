@@ -62,3 +62,13 @@ After deployment, the following outputs will be available:
 - This project supports integration with AWS Glue or Snowflake for downstream data processing.
 
 For more details, refer to the individual `.tf` files in the project.
+
+
+## Future Efforts and Enhancements
+There are some things this project does well, and things that still can be improved.
+- [ ] Enhance Snowflake Open Data Catalog creation to add trust policy and work out of the box
+- [ ] Add Databricks Unity Catalog Support
+- [ ] Allow for configurability of what resources get launched / which don't.
+
+## Contributing
+If you would like to contribute to this project, please submit a PR.
