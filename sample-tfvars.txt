@@ -1,0 +1,11 @@
+# Cloud key
+confluent_cloud_api_key = "ABC123"
+confluent_cloud_api_secret = "ABC123"
+environment_display_name = "my-environment"
+
+# ignore if not using Snowflake
+polaris_client_id = "ABC123" 
+polaris_client_secret = "ABC123="
+snowflake_endpoint = "https://my-endpoint.us-east-1.snowflakecomputing.com"
+snowflake_warehouse = "polaris"
+snowflake_allowed_scope = "PRINCIPAL_ROLE:polarisuserrole"
