@@ -71,4 +71,4 @@ There are some things this project does well, and things that still can be impro
 - [ ] Allow for configurability of what resources get launched / which don't.
 
 ## Contributing
-If you would like to contribute to this project, please submit a PR.
+If you would like to contribute to this project, please submit a PR, and e-mail the author directly with questions.
