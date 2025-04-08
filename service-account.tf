@@ -1,5 +1,5 @@
 resource "confluent_service_account" "my_service_account" {
-  display_name = "my-service-account"
+  display_name = "my-service-account-${random_integer.suffix.result}"
   description  = "Service Account for Tableflow talking to Kafka Cluster"
 }
 

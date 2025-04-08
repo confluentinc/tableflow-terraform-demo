@@ -4,7 +4,7 @@ locals {
 
 
 resource "aws_iam_policy" "s3_policy" {
-    name        = "TableflowS3AccessPolicy"
+    name        = "TableflowS3AccessPolicy-${aws_s3_bucket.my_bucket.id}"
     description = "Policy to allow S3 bucket access"
     policy      = jsonencode({
         Version = "2012-10-17"
