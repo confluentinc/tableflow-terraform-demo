@@ -35,7 +35,7 @@ Only used if running snowflake open data catalog.
   - `polaris_client_id`: Client ID for Snowflake Open Data Account
   - `polaris_client_secret`: Secret key for Snowflake Open Data Account
   - `snowflake_endpoint`: Endpoint for Tableflow to write to Snowflake Open Data Catalog
-  - `snowflake_warehose`: The name of your open data catalog
+  - `snowflake_warehouse`: The name of your open data catalog
   - `snowflake_allowed_scope`: In the format of PRINCIPAL_ROLE:<my-principal-role>, the permission scope when writing to snowflake.
 
 ## Deployment Steps
