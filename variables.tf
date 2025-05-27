@@ -126,3 +126,9 @@ variable "databricks_token" {
   sensitive   = true
   default     = "NULL"
 }
+
+variable "databricks_sql_warehouse_name" {
+  description = "The name of the Databricks SQL warehouse to use"
+  type        = string
+  default = "NULL"
+}
