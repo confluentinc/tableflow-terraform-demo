@@ -39,3 +39,28 @@ resource "databricks_grants" "some" {
     privileges = ["ALL_PRIVILEGES"]
   }
 }
+
+
+resource "databricks_directory" "shared_dir" {
+  count = var.catalog_type == "databricks" ? 1 : 0
+  path = "/Shared/Queries"
+}
+
+resource "databricks_query" "this" {
+  count = var.catalog_type == "databricks" ? 1 : 0
+
+  warehouse_id = data.databricks_sql_warehouse.my_existing_warehouse[0].id
+  display_name = "My Query Name"
+  parent_path  = databricks_directory.shared_dir[0].path
+
+  query_text = <<-EOT
+      DROP TABLE tableflowdelta.default.ext_stockquotes;
+
+      -- This query creates an external table in the Databricks Unity Catalog
+      CREATE TABLE IF NOT EXISTS tableflowdelta.default.ext_stockquotes
+       USING DELTA
+       LOCATION 's3://jber-confluent-databricks-data/10110100/110101/79ee1009-b72b-4016-88bd-b18ca2b5067d/env-7k7dg1/lkc-7977pj/v1/949eff0f-70d9-47f7-9315-d1f595373d5e/';
+
+    SELECT * FROM tableflowdelta.default.ext_stockquotes LIMIT 100;
+  EOT
+}

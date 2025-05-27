@@ -49,3 +49,10 @@ data "databricks_current_user" "current_principal_from_workspace_provider" {
   # Explicitly link this data source to the provider instance with alias "workspace"
   provider = databricks.workspace
 }
+
+
+data "databricks_sql_warehouse" "my_existing_warehouse" {
+  count = var.catalog_type == "databricks" ? 1 : 0
+  name = var.databricks_sql_warehouse_name
+}
+
