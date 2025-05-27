@@ -77,4 +77,5 @@ module "tableflow-demo-with-databricks"{
   databricks_workspace_name = var.databricks_workspace_name
   databricks_host = var.databricks_host
   databricks_token = var.databricks_token
+  databricks_sql_warehouse_name = var.databricks_sql_warehouse_name
 }
