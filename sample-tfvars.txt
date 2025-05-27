@@ -1,11 +1,32 @@
-# Cloud key
-confluent_cloud_api_key = "ABC123"
-confluent_cloud_api_secret = "ABC123"
-environment_display_name = "my-environment"
+# Confluent Cloud Configuration
+confluent_cloud_api_key = "<your-confluent-cloud-api-key>"
+confluent_cloud_api_secret = "<your-confluent-cloud-api-secret>"
 
-# ignore if not using Snowflake
-polaris_client_id = "ABC123" 
-polaris_client_secret = "ABC123="
-snowflake_endpoint = "https://my-endpoint.us-east-1.snowflakecomputing.com"
-snowflake_warehouse = "polaris"
-snowflake_allowed_scope = "PRINCIPAL_ROLE:polarisuserrole"
+# Environment Display Names
+# Required: Glue environment. Optional: Snowflake and Databricks environments if using those integrations.
+glue_environment_display_name = "<your-glue-environment-display-name>"
+snowflake_environment_display_name = "<your-snowflake-environment-display-name>"  # optional
+databricks_environment_display_name = "<your-databricks-environment-display-name>"  # optional
+
+# AWS Configuration
+aws_region = "<your-aws-region>"
+
+# Snowflake Configuration (Optional)
+snowflake_endpoint = "<your-snowflake-endpoint>"
+snowflake_warehouse = "<your-snowflake-warehouse>"
+snowflake_allowed_scope = "<your-snowflake-allowed-scope>"  # e.g., PRINCIPAL_ROLE:my-snowflake-principal-role
+
+# Polaris Configuration (Optional)
+polaris_client_id = "<your-polaris-client-id>"
+polaris_client_secret = "<your-polaris-client-secret>"
+polaris_account_name = "<your-polaris-account-name>"
+polaris_username = "<your-polaris-username>"
+polaris_password = "<your-polaris-password>"
+polaris_region = "<your-polaris-region>"
+
+# Databricks Configuration (Optional)
+databricks_workspace_id = "<your-databricks-workspace-id>"
+databricks_workspace_name = "<your-databricks-workspace-name>"
+databricks_account_id = "<your-databricks-account-id>"
+databricks_host = "<your-databricks-host>"
+databricks_token = "<your-databricks-token>"

@@ -6,7 +6,9 @@ resource "confluent_tableflow_topic" "stock_trades" {
     id = confluent_kafka_cluster.kafka-cluster.id
   }
   display_name = confluent_kafka_topic.stock_trades.topic_name
-  table_formats = ["ICEBERG"]
+
+  # Set table format based on catalog_type
+  table_formats = var.catalog_type == "databricks" ? ["DELTA"] : ["ICEBERG"]
 
   // Use BYOB AWS storage
   byob_aws {
@@ -14,9 +16,8 @@ resource "confluent_tableflow_topic" "stock_trades" {
     provider_integration_id = confluent_provider_integration.main.id
   }
 
-
   credentials {
-    key = confluent_api_key.my-tableflow-api-key.id
+    key    = confluent_api_key.my-tableflow-api-key.id
     secret = confluent_api_key.my-tableflow-api-key.secret
   }
 

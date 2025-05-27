@@ -25,18 +25,37 @@ Before using these scripts, ensure you have:
 
 You need to define the following variables in a `variables.tf` file or provide them via environment variables or a `.tfvars` file:
 
-- **Confluent Variables**:
-  - `confluent_cloud_api_key`: Your Confluent Cloud API Key
-  - `confluent_cloud_api_secret`: Your Confluent Cloud API Key
-  - `environment_display_name`: What you want the name of your environment to be
+### Confluent Cloud Variables (Required)
+- `confluent_cloud_api_key` (string): Confluent Cloud API Key
+- `confluent_cloud_api_secret` (string, sensitive): Confluent Cloud API Secret
 
-- **Snowflake Variables (Optional)**:
-Only used if running snowflake open data catalog.
-  - `polaris_client_id`: Client ID for Snowflake Open Data Account
-  - `polaris_client_secret`: Secret key for Snowflake Open Data Account
-  - `snowflake_endpoint`: Endpoint for Tableflow to write to Snowflake Open Data Catalog
-  - `snowflake_warehouse`: The name of your open data catalog
-  - `snowflake_allowed_scope`: In the format of PRINCIPAL_ROLE:<my-principal-role>, the permission scope when writing to snowflake.
+### Environment Display Names (Required)
+- `glue_environment_display_name` (string): Display name for the Glue environment
+- `snowflake_environment_display_name` (string, optional): Display name for the Snowflake environment
+- `databricks_environment_display_name` (string, optional): Display name for the Databricks environment
+
+### AWS Variables (Required)
+- `aws_region` (string): AWS region
+
+### Snowflake Variables (Optional, for Snowflake integration)
+- `snowflake_endpoint` (string, sensitive): Snowflake endpoint
+- `snowflake_warehouse` (string): Snowflake warehouse
+- `snowflake_allowed_scope` (string): Snowflake allowed scope (e.g., `PRINCIPAL_ROLE:<my-principal-role>`)
+
+### Polaris Variables (Optional, for Snowflake Open Data/Polaris integration)
+- `polaris_client_id` (string, sensitive): Polaris Client ID
+- `polaris_client_secret` (string, sensitive): Polaris Client Secret
+- `polaris_account_name` (string): Polaris account name
+- `polaris_username` (string): Polaris username
+- `polaris_password` (string, sensitive): Polaris password
+- `polaris_region` (string): Polaris region
+
+### Databricks Variables (Optional, for Databricks integration)
+- `databricks_workspace_id` (string): Databricks workspace ID
+- `databricks_workspace_name` (string): Databricks workspace name
+- `databricks_account_id` (string): Databricks account ID
+- `databricks_host` (string): Databricks workspace host URL
+- `databricks_token` (string, sensitive): Databricks workspace token
 
 ## Deployment Steps
 
