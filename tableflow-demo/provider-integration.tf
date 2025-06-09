@@ -10,4 +10,9 @@ resource "confluent_provider_integration" "main" {
     # Note: This is a workaround to avoid updating an existing role or creating a circular dependency.
     customer_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.iam_role_name}"
   }
+    depends_on = [
+      confluent_environment.my_environment,
+      confluent_kafka_cluster.kafka-cluster,
+      aws_s3_bucket.my_bucket
+    ]
 }
