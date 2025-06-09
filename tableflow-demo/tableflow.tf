@@ -25,7 +25,7 @@ resource "confluent_tableflow_topic" "stock_trades" {
   # an instance of confluent_tableflow_topic is created since it requires
   # a topic with a schema.
   depends_on = [
-    confluent_schema.avro-stock-trades,
-    aws_iam_role.s3_access_role
+    aws_iam_role.s3_access_role,
+    confluent_kafka_topic.stock_trades,
   ]
 }
