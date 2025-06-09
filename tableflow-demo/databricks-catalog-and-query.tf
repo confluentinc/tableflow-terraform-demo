@@ -16,6 +16,20 @@ resource "databricks_storage_credential" "external" {
   depends_on = [ aws_iam_role.s3_access_role, aws_iam_role_policy_attachment.s3_policy_attachment, aws_iam_role_policy.s3_access_role_self_assume_policy] 
 }
 
+resource "null_resource" "wait_for_iam_propagation" {
+  count = var.catalog_type == "databricks" ? 1 : 0
+
+  provisioner "local-exec" {
+    command = "echo 'Waiting for IAM propagation...' && sleep 60"
+  }
+
+  triggers = {
+    iam_role = aws_iam_role.s3_access_role.id
+    policy   = aws_iam_policy.s3_policy.id
+    attach   = aws_iam_role_policy_attachment.s3_policy_attachment.id
+  }
+}
+
 resource "databricks_external_location" "some" {
   count = var.catalog_type == "databricks" ? 1 : 0
 
@@ -23,8 +37,17 @@ resource "databricks_external_location" "some" {
   url             = "s3://${aws_s3_bucket.my_bucket.bucket}/"
   credential_name = databricks_storage_credential.external[0].id
   comment         = "Managed by TF"
-  depends_on = [ aws_iam_role.s3_access_role, aws_iam_role_policy_attachment.s3_policy_attachment, aws_iam_role_policy.s3_access_role_self_assume_policy, aws_iam_policy.s3_policy]
-  }
+  depends_on = [
+    null_resource.wait_for_iam_propagation,
+    aws_iam_role.s3_access_role,
+    aws_iam_policy.s3_policy,
+    aws_iam_role_policy_attachment.s3_policy_attachment,
+    aws_iam_role_policy.s3_access_role_self_assume_policy,
+    aws_s3_bucket.my_bucket,
+    confluent_connector.stock_datagen,
+    confluent_connector.users_datagen,
+  ]
+}
 
 
 resource "databricks_grants" "some" {
@@ -43,7 +66,7 @@ resource "databricks_grants" "some" {
 
 resource "databricks_directory" "shared_dir" {
   count = var.catalog_type == "databricks" ? 1 : 0
-  path = "/Shared/Queries"
+  path = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
 }
 
 resource "databricks_query" "this" {

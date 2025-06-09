@@ -34,11 +34,11 @@ provider "databricks" {
   token = var.databricks_token
 }
 
-provider "databricks" {
-  alias         = "mws"
-  account_id    = var.databricks_account_id
-  host          = "https://accounts.cloud.databricks.com"
-}
+# provider "databricks" {
+#   alias         = "mws"
+#   account_id    = var.databricks_account_id
+#   host          = "https://accounts.cloud.databricks.com"
+# }
 
 data "aws_caller_identity" "current" {}
 
