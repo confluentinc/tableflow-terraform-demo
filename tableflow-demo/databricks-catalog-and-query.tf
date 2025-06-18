@@ -58,7 +58,7 @@ resource "databricks_grants" "some" {
   external_location = databricks_external_location.some[0].id
 
   grant {
-    principal  = data.databricks_current_user.current_principal_from_workspace_provider[0].user_name
+    principal  = "account users"
     privileges = ["ALL_PRIVILEGES"]
   }
 }
@@ -69,21 +69,22 @@ resource "databricks_directory" "shared_dir" {
   path = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
 }
 
-resource "databricks_query" "this" {
-  count = var.catalog_type == "databricks" ? 1 : 0
+# resource "databricks_sql_table" "external_stockquotes" {
+#   count = var.catalog_type == "databricks" ? 1 : 0
 
-  warehouse_id = data.databricks_sql_warehouse.my_existing_warehouse[0].id
-  display_name = "My Query Name"
-  parent_path  = databricks_directory.shared_dir[0].path
+#   name = "ext_stockquotes-${random_integer.suffix.result}"
+#   catalog_name = "workspace"
+#   schema_name = "default"
+#   table_type = "EXTERNAL"
+#   # cluster_id = "0610-163144-bza1agxk"
 
-  query_text = <<-EOT
-      DROP TABLE tableflowdelta.default.ext_stockquotes;
+#   storage_location = "s3://cflt-tflow-4955/1101100/110101/79ee1009-b72b-4016-88bd-b18ca2b5067d/env-pw8jgm/lkc-rx076k/v1/e9a8cb68-7670-410e-9c26-dd954ffa4ab6"
 
-      -- This query creates an external table in the Databricks Unity Catalog
-      CREATE TABLE IF NOT EXISTS tableflowdelta.default.ext_stockquotes
-       USING DELTA
-       LOCATION 's3://jber-confluent-databricks-data/10110100/110101/79ee1009-b72b-4016-88bd-b18ca2b5067d/env-7k7dg1/lkc-7977pj/v1/949eff0f-70d9-47f7-9315-d1f595373d5e/';
+#   depends_on = [
+#     databricks_external_location.some,
+#     databricks_storage_credential.external
+#   ]
+#   comment = "External table for stock quotes data managed by Tableflow"
+# }
 
-    SELECT * FROM tableflowdelta.default.ext_stockquotes LIMIT 100;
-  EOT
-}
+

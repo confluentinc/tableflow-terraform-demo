@@ -29,3 +29,4 @@ resource "confluent_tableflow_topic" "stock_trades" {
     confluent_kafka_topic.stock_trades,
   ]
 }
+

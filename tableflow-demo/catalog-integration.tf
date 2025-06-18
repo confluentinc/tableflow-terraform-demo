@@ -20,7 +20,8 @@ resource "confluent_catalog_integration" "my_catalog" {
   }
 }
 
-# TODO: create open data catalog, catalog role, principal role, etc update trust policy with ID
+
+
 resource "confluent_catalog_integration" "snowflake_catalog" {
   count = var.catalog_type == "snowflake" ? 1 : 0
 
@@ -46,3 +47,4 @@ resource "confluent_catalog_integration" "snowflake_catalog" {
     prevent_destroy = false
   }
 }
+
