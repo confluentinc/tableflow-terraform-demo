@@ -44,3 +44,6 @@ output "stock_topic_id" {
   description = "The ID (UUID) of the Data Gen Stock Kafka Topic."
   value       = confluent_kafka_topic.stock_trades.id
 }
+
+
+

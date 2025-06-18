@@ -56,3 +56,4 @@ data "databricks_sql_warehouse" "my_existing_warehouse" {
   name = var.databricks_sql_warehouse_name
 }
 
+
