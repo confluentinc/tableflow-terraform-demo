@@ -47,23 +47,23 @@ provider "databricks" {
 #   environment_display_name = var.glue_environment_display_name
 # }
 
-# module "tableflow-demo-with-snowflake"{
-#   source = "./tableflow-demo"
-#   polaris_account_name = var.polaris_account_name
-#   polaris_username = var.polaris_username
-#   polaris_password = var.polaris_password
-#   confluent_cloud_api_key = var.confluent_cloud_api_key
-#   confluent_cloud_api_secret = var.confluent_cloud_api_secret
-#   snowflake_endpoint = var.snowflake_endpoint
-#   snowflake_warehouse = var.snowflake_warehouse
-#   snowflake_allowed_scope = var.snowflake_allowed_scope
-#   aws_region = var.aws_region
-#   catalog_type = var.snowflake_catalog_type
-#   environment_display_name = var.snowflake_environment_display_name
-#   polaris_client_id = var.polaris_client_id
-#   polaris_client_secret = var.polaris_client_secret
-#   polaris_region = var.polaris_region
-# }
+module "tableflow-demo-with-snowflake"{
+  source = "./tableflow-demo"
+  polaris_account_name = var.polaris_account_name
+  polaris_username = var.polaris_username
+  polaris_password = var.polaris_password
+  confluent_cloud_api_key = var.confluent_cloud_api_key
+  confluent_cloud_api_secret = var.confluent_cloud_api_secret
+  snowflake_endpoint = var.snowflake_endpoint
+  snowflake_warehouse = var.snowflake_warehouse
+  snowflake_allowed_scope = var.snowflake_allowed_scope
+  aws_region = var.aws_region
+  catalog_type = var.snowflake_catalog_type
+  environment_display_name = var.snowflake_environment_display_name
+  polaris_client_id = var.polaris_client_id
+  polaris_client_secret = var.polaris_client_secret
+  polaris_region = var.polaris_region
+}
 
 module "tableflow-demo-with-databricks"{
   source = "./tableflow-demo"
