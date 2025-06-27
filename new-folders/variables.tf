@@ -15,10 +15,18 @@ variable "environment_display_name" {
 }
 
 variable "catalog_types" {
-  description = "The types of catalog integration to use (e.g., [glue, databricks, snowflake])"
+  description = "A list of catalog types (e.g., 'glue', 'snowflake', 'databricks') for which to provision resources. An empty list will provision no resources."
   type        = list(string)
-  default     = ["glue", "databricks", "snowflake"]
+  default     = ["glue", "snowflake", "databricks"]
+
+  validation {
+    condition = alltrue([
+      for t in var.catalog_types : contains(["glue", "snowflake", "databricks"], t)
+    ])
+    error_message = "Each catalog_type must be one of: glue, snowflake, databricks."
+  }
 }
+
 
 # Snowflake Variables
 variable "snowflake_endpoint" {
