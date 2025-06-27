@@ -1,0 +1,25 @@
+locals {
+  topic_names = ["stock-trades", "users"]
+
+  // Create all cluster/topic combinations as a map for for_each
+  cluster_topic_combinations = {
+    for pair in setproduct(keys(confluent_kafka_cluster.clusters), local.topic_names) :
+    "${pair[0]}-${pair[1]}" => {
+      cluster_key = pair[0]
+      topic_name  = pair[1]
+    }
+  }
+}
+
+resource "confluent_kafka_topic" "cluster_topics" {
+  for_each = local.cluster_topic_combinations
+
+  kafka_cluster {
+    id = confluent_kafka_cluster.clusters[each.value.cluster_key].id
+  }
+
+  topic_name = each.value.topic_name
+
+  partitions_count = 6
+  rest_endpoint   = confluent_kafka_cluster.clusters[each.value.cluster_key].rest_endpoint
+}
