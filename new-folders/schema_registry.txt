@@ -1,6 +1,0 @@
-# Schema Registry for Environment
-data "confluent_schema_registry_cluster" "schema_registry" {
-  environment {
-    id = confluent_environment.my_environment.id
-  }
-}
