@@ -1,11 +1,12 @@
 terraform {
   required_providers {
     confluent = {
-      source  = "confluentinc/confluent" 
-      version = "2.22.0"                
+      source  = "confluentinc/confluent"
+      version = ">= 2.32.0"
     }
   }
-  }
+}
+
 
 resource "confluent_kafka_topic" "kafka_topic" {
   kafka_cluster {
