@@ -64,19 +64,6 @@ module "kafka_topic_stock_trades" {
 }
 
 
-# create schema registry here
-module "schema_registry" {
-  for_each         = module.kafka_clusters
-  source           = "./modules/schema_registry"
-  environment_id   = module.confluent_env_module.environment_id
-  schema_registry_api_key = module.api_keys[each.key].schema_registry_api_key
-  schema_registry_api_secret = module.api_keys[each.key].schema_registry_api_secret
-  stock_topic_name = module.kafka_topic_stock_trades[each.key].topic_name
-  users_topic_name = module.kafka_topic_users[each.key].topic_name
-  depends_on = [ confluent_role_binding.all_topics_admin, confluent_role_binding.environment_admin,
-                  module.kafka_topic_stock_trades, module.kafka_topic_users, module.api_keys ]
-}
-
 module "kafka_topic_users" {
   for_each = module.kafka_clusters
   source           = "./modules/kafka_topic"
@@ -87,6 +74,29 @@ module "kafka_topic_users" {
   api_secret       = module.api_keys[each.key].api_secret
 
 }
+
+module "schema_registry_api_keys" {
+  source           = "./modules/schema_registry_api_keys"
+  service_account_id = confluent_service_account.my_service_account.id
+  service_account_api_version = confluent_service_account.my_service_account.api_version
+  service_account_kind = confluent_service_account.my_service_account.kind
+  environment_id   = module.confluent_env_module.environment_id
+  depends_on = [ module.kafka_clusters ]
+}
+
+
+# create schema registry here
+module "schema_registry" {
+  source           = "./modules/schema_registry"
+  environment_id   = module.confluent_env_module.environment_id
+  schema_registry_api_key = module.schema_registry_api_keys.api_key
+  schema_registry_api_secret = module.schema_registry_api_keys.api_secret
+  stock_topic_name = "stock_trades"
+  users_topic_name = "users"
+  depends_on = [ confluent_role_binding.all_topics_admin, confluent_role_binding.environment_admin,
+                  module.kafka_topic_stock_trades, module.kafka_topic_users, module.api_keys ]
+}
+
 
 module "datagen_stock_trades" {
   for_each           = module.kafka_clusters
@@ -196,15 +206,15 @@ module "tableflow_stock_trades" {
   ]
 }
 
-# # catalog integration (only if "glue" is in catalog_types)
-# module "glue_catalog_integration" {
-#   count = contains(var.catalog_types, "glue") ? 1 : 0
+# catalog integration (only if "glue" is in catalog_types)
+module "glue_catalog_integration" {
+  count = contains(var.catalog_types, "glue") ? 1 : 0
 
-#   source = "./modules/glue_catalog_integration"
-#   environment_id = module.confluent_env_module.environment_id
-#   catalog_type = "glue"
-#   cluster_id = module.kafka_clusters["glue"].cluster_id
-#   provider_integration_internal_id = module.provider_integration["glue"].provider_integration_internal_id
-#   tableflow_api_key = module.tableflow_api_key.api_key
-#   tableflow_api_secret = module.tableflow_api_key.api_secret
-# }
+  source = "./modules/glue_catalog_integration"
+  environment_id = module.confluent_env_module.environment_id
+  catalog_type = "glue"
+  cluster_id = module.kafka_clusters["glue"].cluster_id
+  provider_integration_internal_id = module.provider_integration["glue"].provider_integration_internal_id
+  tableflow_api_key = module.tableflow_api_key.api_key
+  tableflow_api_secret = module.tableflow_api_key.api_secret
+}
