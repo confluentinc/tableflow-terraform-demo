@@ -218,3 +218,20 @@ module "glue_catalog_integration" {
   tableflow_api_key = module.tableflow_api_key.api_key
   tableflow_api_secret = module.tableflow_api_key.api_secret
 }
+
+# catalog integration (only if "snowflake" is in catalog_types)
+module "snowflake_catalog_integration" {
+  count = contains(var.catalog_types, "snowflake") ? 1 : 0
+
+  source = "./modules/snowflake_catalog_integration"
+
+  environment_id                   = module.confluent_env_module.environment_id
+  kafka_cluster_id                 =  module.kafka_clusters["snowflake"].cluster_id
+  snowflake_endpoint               = var.snowflake_endpoint
+  snowflake_warehouse              = var.snowflake_warehouse
+  snowflake_allowed_scope          = var.snowflake_allowed_scope
+  polaris_client_id                = var.polaris_client_id
+  polaris_client_secret            = var.polaris_client_secret
+  tableflow_api_key = module.tableflow_api_key.api_key
+  tableflow_api_secret = module.tableflow_api_key.api_secret
+}
