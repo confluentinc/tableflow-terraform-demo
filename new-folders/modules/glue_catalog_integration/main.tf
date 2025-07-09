@@ -16,7 +16,7 @@ resource "confluent_catalog_integration" "my_catalog" {
   kafka_cluster {
     id = var.cluster_id
   }
-  display_name = "catalog-integration-1"
+  display_name = "catalog-integration-glue"
   aws_glue {
     provider_integration_id = var.provider_integration_internal_id
   }
