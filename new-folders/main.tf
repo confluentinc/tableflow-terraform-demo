@@ -235,3 +235,21 @@ module "snowflake_catalog_integration" {
   tableflow_api_key = module.tableflow_api_key.api_key
   tableflow_api_secret = module.tableflow_api_key.api_secret
 }
+
+module "databricks_external_table" {
+  count = contains(var.catalog_types, "databricks") ? 1 : 0
+
+  source                    = "./modules/databricks_external_table"
+  storage_credential_name   = "tableflow-external-credential-${random_integer.suffix.result}"
+  aws_iam_role_arn          = module.iam_role.iam_role_arn
+  iam_role_id               = module.iam_role.iam_role_id
+  iam_policy_id             = module.iam_role.iam_policy_id
+  iam_policy_attachment_id  = module.iam_role.iam_policy_attachment_id
+  external_location_name    = "tableflow-external-location-${random_integer.suffix.result}"
+  s3_bucket_name            = module.s3_bucket.bucket_name
+  catalog_type              = "databricks"
+  grant_principal           = "account users"
+  shared_dir_path           = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
+  sql_warehouse_id          = var.databricks_sql_warehouse_name
+  query_display_name        = "Tableflow External Table Query ${random_integer.suffix.result}"
+}
