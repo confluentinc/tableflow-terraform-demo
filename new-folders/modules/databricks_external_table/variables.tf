@@ -57,3 +57,41 @@ variable "query_display_name" {
   description = "The display name for the Databricks query."
   type        = string
 }
+
+variable "databricks_host" {
+  description = "The host URL of the Databricks workspace."
+  type        = string
+  default     = "NULL"
+}
+
+variable "databricks_token" {
+  description = "The token for the Databricks workspace."
+  type        = string
+  sensitive   = true
+  default     = "NULL"
+}
+
+variable "confluent_organization_id" {  
+  description = "The Confluent organization ID."
+  type        = string
+  default     = "NULL"
+}
+
+variable "confluent_environment_id" {
+  description = "The Confluent environment ID."
+  type        = string
+  default     = "NULL"
+}
+
+variable "confluent_cluster_id" {
+  description = "The Confluent cluster ID."
+  type        = string
+  default     = "NULL"
+}
+
+variable "kafka_topic_id" {
+  description = "The Kafka topic ID."
+  type        = string
+  default     = "NULL"
+}
+

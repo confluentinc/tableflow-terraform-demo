@@ -10,15 +10,15 @@ resource "confluent_role_binding" "environment_admin" {
 }
 
 resource "confluent_role_binding" "cluster_admin" {
-  for_each   = module.kafka_clusters
-  principal  = "User:${confluent_service_account.my_service_account.id}"
-  role_name  = "CloudClusterAdmin"
+  for_each    = module.kafka_clusters
+  principal   = "User:${confluent_service_account.my_service_account.id}"
+  role_name   = "CloudClusterAdmin"
   crn_pattern = each.value.rbac_crn
 }
 
 resource "confluent_role_binding" "all_topics_admin" {
-  for_each   = module.kafka_clusters
-  principal  = "User:${confluent_service_account.my_service_account.id}"
-  role_name  = "ResourceOwner"
+  for_each    = module.kafka_clusters
+  principal   = "User:${confluent_service_account.my_service_account.id}"
+  role_name   = "ResourceOwner"
   crn_pattern = "${each.value.rbac_crn}/kafka=${each.value.cluster_id}/topic=*"
 }

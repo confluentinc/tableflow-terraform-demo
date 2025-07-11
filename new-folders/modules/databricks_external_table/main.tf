@@ -1,5 +1,17 @@
+terraform {
+  required_providers {
+  databricks = {
+    source  = "databricks/databricks"
+      version = ">= 1.0.0"
+  }
+}
+}
 
-data "databricks_current_user" "me" {}
+
+data "databricks_current_user" "me" {
+}
+
+
 
 resource "databricks_storage_credential" "external" {
   name = var.storage_credential_name
@@ -26,20 +38,23 @@ resource "databricks_external_location" "some" {
 
   name            = var.external_location_name
   url             = "s3://${var.s3_bucket_name}/"
-  credential_name = databricks_storage_credential.external[0].id
+  credential_name = databricks_storage_credential.external.id
   comment         = "Managed by TF"
+    depends_on = [  null_resource.wait_for_iam_propagation
+]
 
 }
 
 resource "databricks_grants" "some" {
 
-  provider = databricks.workspace
-  external_location = databricks_external_location.some[0].id
+  # provider = databricks.workspace
+  external_location = databricks_external_location.some.id
 
   grant {
     principal  = var.grant_principal
     privileges = ["ALL_PRIVILEGES"]
   }
+  depends_on = [ databricks_external_location.some, databricks_storage_credential.external, null_resource.wait_for_iam_propagation ]
 }
 
 resource "databricks_directory" "shared_dir" {
@@ -50,7 +65,7 @@ resource "databricks_query" "this" {
 
   warehouse_id = var.sql_warehouse_id
   display_name = var.query_display_name
-  parent_path  = databricks_directory.shared_dir[0].path
+  parent_path  = databricks_directory.shared_dir.path
 
   query_text = <<-EOT
       DROP TABLE tableflowdelta.default.ext_stockquotes;
@@ -58,7 +73,7 @@ resource "databricks_query" "this" {
       -- This query creates an external table in the Databricks Unity Catalog
       CREATE TABLE IF NOT EXISTS tableflowdelta.default.ext_stockquotes
        USING DELTA
-       LOCATION 's3://jber-confluent-databricks-data/10110100/110101/79ee1009-b72b-4016-88bd-b18ca2b5067d/env-7k7dg1/lkc-7977pj/v1/949eff0f-70d9-47f7-9315-d1f595373d5e/';
+      LOCATION 's3://${var.s3_bucket_name}/10110100/110101/${var.confluent_organization_id}/${var.confluent_environment_id}/${var.confluent_cluster_id}/v1/${var.kafka_topic_id}/';
 
     SELECT * FROM tableflowdelta.default.ext_stockquotes LIMIT 100;
   EOT
