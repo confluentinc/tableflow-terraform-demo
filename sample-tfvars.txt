@@ -1,32 +1,52 @@
 # Confluent Cloud Configuration
-confluent_cloud_api_key = "<your-confluent-cloud-api-key>"
-confluent_cloud_api_secret = "<your-confluent-cloud-api-secret>"
+# Your Confluent Cloud API Key. This can be generated in the Confluent Cloud UI.
+confluent_cloud_api_key    = "YOUR_CONFLUENT_CLOUD_API_KEY"
+# Your Confluent Cloud API Secret. This can be generated in the Confluent Cloud UI.
+confluent_cloud_api_secret = "YOUR_CONFLUENT_CLOUD_API_SECRET"
 
 # Environment Display Names
-# Required: Glue environment. Optional: Snowflake and Databricks environments if using those integrations.
-glue_environment_display_name = "<your-glue-environment-display-name>"
-snowflake_environment_display_name = "<your-snowflake-environment-display-name>"  # optional
-databricks_environment_display_name = "<your-databricks-environment-display-name>"  # optional
+# A user-friendly name for your Confluent Cloud environment.
+environment_display_name = "YOUR_ENVIRONMENT_DISPLAY_NAME"
+# A list of catalog types (e.g., "databricks", "snowflake", "glue") that will be used.
+catalog_types            = ["databricks", "snowflake", "glue"] # Customize as needed
+
+# Snowflake Configuration
+# The endpoint URL for your Snowflake account.
+snowflake_endpoint      = "https://YOUR_SNOWFLAKE_ACCOUNT_IDENTIFIER.YOUR_REGION.snowflakecomputing.com"
+# The name of the Snowflake warehouse to be used.
+snowflake_warehouse     = "YOUR_SNOWFLAKE_WAREHOUSE_NAME"
+# The allowed scope for the Snowflake principal role, typically in the format "PRINCIPAL_ROLE:your_role_name".
+snowflake_allowed_scope = "PRINCIPAL_ROLE:YOUR_SNOWFLAKE_PRINCIPAL_ROLE"
+
+# Polaris Configuration
+# Your Polaris Client ID. Obtain this from your Polaris account settings.
+polaris_client_id     = "YOUR_POLARIS_CLIENT_ID"
+# Your Polaris Client Secret. Obtain this from your Polaris account settings.
+polaris_client_secret = "YOUR_POLARIS_CLIENT_SECRET"
+# Your Polaris account name.
+polaris_account_name  = "YOUR_POLARIS_ACCOUNT_NAME"
+# The username for your Polaris account.
+polaris_username      = "YOUR_POLARIS_USERNAME"
+# The password for your Polaris account.
+polaris_password      = "YOUR_POLARIS_PASSWORD"
+# The AWS region where your Polaris instance is deployed (e.g., "us-east-1").
+polaris_region        = "YOUR_POLARIS_REGION"
 
 # AWS Configuration
-aws_region = "<your-aws-region>"
+# The AWS region where your resources will be deployed (e.g., "us-east-1").
+aws_region = "YOUR_AWS_REGION"
 
-# Snowflake Configuration (Optional)
-snowflake_endpoint = "<your-snowflake-endpoint>"
-snowflake_warehouse = "<your-snowflake-warehouse>"
-snowflake_allowed_scope = "<your-snowflake-allowed-scope>"  # e.g., PRINCIPAL_ROLE:my-snowflake-principal-role
+# Databricks Configuration
+# The ID of your Databricks workspace. Found in the Databricks URL (e.g., after '?o=').
+databricks_workspace_id = "YOUR_DATABRICKS_WORKSPACE_ID"
+# The name of your Databricks workspace.
+databricks_workspace_name = "YOUR_DATABRICKS_WORKSPACE_NAME"
+# The account ID associated with your Databricks account.
+databricks_account_id = "YOUR_DATABRICKS_ACCOUNT_ID"
+# The host URL for your Databricks workspace.
+databricks_host = "https://YOUR_DATABRICKS_HOST_URL"
+# A Databricks personal access token. Generate this in your Databricks user settings.
+databricks_token = "YOUR_DATABRICKS_PERSONAL_ACCESS_TOKEN"
+# The name of the Databricks SQL Warehouse to connect to.
+databricks_sql_warehouse_name = "YOUR_DATABRICKS_SQL_WAREHOUSE_NAME"
 
-# Polaris Configuration (Optional)
-polaris_client_id = "<your-polaris-client-id>"
-polaris_client_secret = "<your-polaris-client-secret>"
-polaris_account_name = "<your-polaris-account-name>"
-polaris_username = "<your-polaris-username>"
-polaris_password = "<your-polaris-password>"
-polaris_region = "<your-polaris-region>"
-
-# Databricks Configuration (Optional)
-databricks_workspace_id = "<your-databricks-workspace-id>"
-databricks_workspace_name = "<your-databricks-workspace-name>"
-databricks_account_id = "<your-databricks-account-id>"
-databricks_host = "<your-databricks-host>"
-databricks_token = "<your-databricks-token>"
