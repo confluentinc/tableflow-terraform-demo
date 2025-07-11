@@ -102,13 +102,13 @@ variable "databricks_workspace_id" {
 variable "databricks_account_id" {
   description = "The account ID of the Databricks workspace"
   type        = string
-  default = "NULL"
+  default     = "NULL"
 }
 
 variable "databricks_workspace_name" {
   description = "The name of the Databricks workspace"
   type        = string
-  default = "NULL"
+  default     = "NULL"
 
 }
 
@@ -128,6 +128,6 @@ variable "databricks_token" {
 variable "databricks_sql_warehouse_name" {
   description = "The name of the Databricks SQL warehouse to use"
   type        = string
-  default = "NULL"
+  default     = "NULL"
 }
 
