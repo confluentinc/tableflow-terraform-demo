@@ -9,7 +9,7 @@ The Terraform scripts in this project perform the following tasks:
 - Configure a Datagen Source Connector to generate sample data for the `stock_trades` and `users` topics.
 - Set up an S3 bucket and IAM roles/policies for BYOB (Bring Your Own Bucket) integration with Confluent Tableflow.
 - Provision a Confluent Tableflow topic (`stock_trades`) with Iceberg table format.
-- Manage API keys for Kafka and Tableflow access.
+- Manage API keys for Kafka and Tableflow access
 
 ## Architecture
 ![](tableflow-demo.drawio.png)
