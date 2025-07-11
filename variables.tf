@@ -9,6 +9,25 @@ variable "confluent_cloud_api_secret" {
   sensitive   = true
 }
 
+variable "environment_display_name" {
+  description = "Display name for the environment"
+  type        = string
+}
+
+variable "catalog_types" {
+  description = "A list of catalog types (e.g., 'glue', 'snowflake', 'databricks') for which to provision resources. An empty list will provision no resources."
+  type        = list(string)
+  default     = ["glue", "snowflake", "databricks"]
+
+  validation {
+    condition = alltrue([
+      for t in var.catalog_types : contains(["glue", "snowflake", "databricks"], t)
+    ])
+    error_message = "Each catalog_type must be one of: glue, snowflake, databricks."
+  }
+}
+
+
 # Snowflake Variables
 variable "snowflake_endpoint" {
   description = "Snowflake endpoint"
@@ -26,14 +45,7 @@ variable "snowflake_allowed_scope" {
   type        = string
   default     = "NULL"
 }
-variable "snowflake_catalog_type" {
-  type    = string
-  default = "snowflake"
-}
-variable "snowflake_environment_display_name" {
-  description = "Display name for the environment"
-  type        = string
-}
+
 
 # Polaris Variables
 variable "polaris_client_id" {
@@ -77,25 +89,11 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-# Glue Variables
-variable "glue_catalog_type" {
-  type    = string
-  default = "glue"
-}
-variable "glue_environment_display_name" {
-  description = "Display name for the environment"
-  type        = string
-}
+
+
 
 # Databricks Variables
-variable "databricks_catalog_type" {
-  type    = string
-  default = "databricks"
-}
-variable "databricks_environment_display_name" {
-  description = "Display name for the environment"
-  type        = string
-}
+
 variable "databricks_workspace_id" {
   description = "The ID of the Databricks workspace"
   type        = string
@@ -104,13 +102,13 @@ variable "databricks_workspace_id" {
 variable "databricks_account_id" {
   description = "The account ID of the Databricks workspace"
   type        = string
-  default = "NULL"
+  default     = "NULL"
 }
 
 variable "databricks_workspace_name" {
   description = "The name of the Databricks workspace"
   type        = string
-  default = "NULL"
+  default     = "NULL"
 
 }
 
@@ -130,5 +128,6 @@ variable "databricks_token" {
 variable "databricks_sql_warehouse_name" {
   description = "The name of the Databricks SQL warehouse to use"
   type        = string
-  default = "NULL"
+  default     = "NULL"
 }
+
