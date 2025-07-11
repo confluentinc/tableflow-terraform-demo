@@ -27,3 +27,15 @@ variable "random_suffix" {
   description = "A random integer suffix for uniqueness."
   type        = string
 }
+
+variable "databricks_account_id" {
+  description = "The Databricks account ID for the role assumption."
+  type        = string
+  default = "NULL"
+}
+
+variable "aws_account_id" {
+  description = "The AWS account ID where the role will be created."
+  type        = string
+  
+}
