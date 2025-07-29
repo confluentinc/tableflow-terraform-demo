@@ -11,6 +11,7 @@ The Terraform scripts in this project perform the following tasks:
 - Provision a Confluent Tableflow topic (`stock_trades`) with Iceberg table format.
 - Manage API keys for Kafka and Tableflow access
 
+
 ## Architecture
 ![](tableflow-demo.drawio.png)
 
@@ -58,6 +59,7 @@ You need to define the following variables in a `variables.tf` file or provide t
 - `databricks_account_id` (string): Databricks account ID
 - `databricks_host` (string): Databricks workspace host URL
 - `databricks_token` (string, sensitive): Databricks workspace token
+
 
 
 ## Deployment Steps

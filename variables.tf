@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 # Confluent Cloud Variables
-=======
->>>>>>> 5506fd838b1132463f707b5438fb32d6c974ede7
 variable "confluent_cloud_api_key" {
   description = "Confluent Cloud API Key (also referred as Cloud API ID)"
   type        = string
@@ -12,7 +9,6 @@ variable "confluent_cloud_api_secret" {
   sensitive   = true
 }
 
-<<<<<<< HEAD
 variable "environment_display_name" {
   description = "Display name for the environment"
   type        = string
@@ -52,52 +48,16 @@ variable "snowflake_allowed_scope" {
 
 
 # Polaris Variables
-=======
-variable "snowflake_endpoint" {
-  description = "Snowflake endpoint"
-  type        = string
-  sensitive = true
-}
-
-variable "snowflake_warehouse" {
-  description = "Snowflake warehouse"
-  type        = string
-}
-
-variable snowflake_allowed_scope {
-  description = "Snowflake allowed scope"
-  type        = string
-}
-
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-  default = "us-east-1"
-}
-
-variable "catalog_type" {
-  description = "The type of catalog integration to use (glue or snowflake)"
-  type        = string
-  default = "glue"
-}
-
->>>>>>> 5506fd838b1132463f707b5438fb32d6c974ede7
 variable "polaris_client_id" {
   description = "Polaris Client ID"
   type        = string
   sensitive   = true
-<<<<<<< HEAD
   default     = "NULL"
 }
-=======
-}
-
->>>>>>> 5506fd838b1132463f707b5438fb32d6c974ede7
 variable "polaris_client_secret" {
   description = "Polaris Client Secret"
   type        = string
   sensitive   = true
-<<<<<<< HEAD
   default     = "NULL"
 }
 variable "polaris_account_name" {
@@ -177,11 +137,3 @@ variable "databricks_client_id" {
   sensitive   = true
   default     = "NULL"
 }
-=======
-}
-
-variable "environment_display_name" {
-  description = "Display name for the environment"
-  type        = string
-}
->>>>>>> 5506fd838b1132463f707b5438fb32d6c974ede7
