@@ -14,12 +14,14 @@ The Terraform scripts in this project perform the following tasks:
 ## Architecture
 ![](tableflow-demo.drawio.png)
 
+
 ## Prerequisites
 
 Before using these scripts, ensure you have:
 1. **AWS Account**: Required for S3 bucket and IAM role creation.
 2. Make sure you configure your aws account locally by running `aws configure`
 3. **Confluent Cloud Account**: Required for Kafka, Tableflow, and connector provisioning.
+
 
 ## Required Variables
 
@@ -56,6 +58,7 @@ You need to define the following variables in a `variables.tf` file or provide t
 - `databricks_account_id` (string): Databricks account ID
 - `databricks_host` (string): Databricks workspace host URL
 - `databricks_token` (string, sensitive): Databricks workspace token
+
 
 ## Deployment Steps
 
