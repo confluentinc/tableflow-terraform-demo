@@ -238,6 +238,14 @@ module "snowflake_catalog_integration" {
   tableflow_api_secret    = module.tableflow_api_key.api_secret
 }
 
+module "flink_compute_pool" {
+  for_each           = module.kafka_clusters
+  source             = "./modules/flink_compute_pool"
+  environment_id     = module.confluent_env_module.environment_id
+  display_name      = "flink-compute-pool-${each.key}"
+  depends_on         = [module.kafka_clusters, module.api_keys]
+}
+
 module "databricks_external_table" {
   count = contains(var.catalog_types, "databricks") ? 1 : 0
 
@@ -250,7 +258,7 @@ module "databricks_external_table" {
   external_location_name   = "tableflow-external-location-${random_integer.suffix.result}"
   s3_bucket_name           = module.aws_s3_bucket["databricks"].bucket_name
   catalog_type             = "databricks"
-  grant_principal          = "account users"
+  grant_principal          = var.databricks_client_id
   shared_dir_path          = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
   sql_warehouse_id         =  data.databricks_sql_warehouse.my_existing_warehouse[0].id
   query_display_name       = "Tableflow External Table Query ${random_integer.suffix.result}"
@@ -260,9 +268,23 @@ module "databricks_external_table" {
   confluent_environment_id  = module.confluent_env_module.environment_id
   confluent_cluster_id      = module.kafka_clusters["databricks"].cluster_id
   kafka_topic_id            = module.kafka_topic_stock_trades["databricks"].topic_id
+  random_suffix = random_integer.suffix.result
   depends_on = [     module.aws_iam_role["databricks"],
     module.aws_s3_bucket["databricks"],
     module.datagen_stock_trades["databricks"],
     module.datagen_users["databricks"]]
 
 }
+
+# module "unity_catalog_integration" {
+#   count = contains(var.catalog_types, "databricks") ? 1 : 0
+
+#   source = "./modules/unity_catalog_integration"
+
+#   environment_id          = module.confluent_env_module.environment_id
+#   kafka_cluster_id        = module.kafka_clusters["databricks"].cluster_id
+#   catalog_name            = "tableflow_catalog"
+#   catalog_type            = "databricks"
+#   tableflow_api_key       = module.tableflow_api_key.api_key
+#   tableflow_api_secret    = module.tableflow_api_key.api_secret
+# }

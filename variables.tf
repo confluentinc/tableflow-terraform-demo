@@ -131,3 +131,9 @@ variable "databricks_sql_warehouse_name" {
   default     = "NULL"
 }
 
+variable "databricks_client_id" {
+  description = "The client ID for Databricks OAuth"
+  type        = string
+  sensitive   = true
+  default     = "NULL"
+}

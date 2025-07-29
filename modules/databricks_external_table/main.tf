@@ -40,22 +40,65 @@ resource "databricks_external_location" "some" {
   url             = "s3://${var.s3_bucket_name}/"
   credential_name = databricks_storage_credential.external.id
   comment         = "Managed by TF"
-    depends_on = [  null_resource.wait_for_iam_propagation
-]
+    depends_on = [  null_resource.wait_for_iam_propagation]
+  force_destroy = true
 
 }
 
-resource "databricks_grants" "some" {
 
-  # provider = databricks.workspace
+resource "databricks_catalog" "unity-demo-catalog" {
+  name        = "unity-demo-${var.random_suffix}"
+  comment     = "Managed by TF"
+  properties  = {}
+  force_destroy = true
+  depends_on  = [databricks_storage_credential.external, null_resource.wait_for_iam_propagation]
+}
+resource "databricks_grants" "grant_service_principal" {
+
   external_location = databricks_external_location.some.id
 
   grant {
     principal  = var.grant_principal
-    privileges = ["ALL_PRIVILEGES"]
+    privileges = ["CREATE EXTERNAL TABLE", "READ FILES", "WRITE FILES"]
   }
+  grant {
+    principal  = data.databricks_current_user.me.user_name
+    privileges = ["CREATE EXTERNAL TABLE", "READ FILES", "WRITE FILES"]
+  }
+
   depends_on = [ databricks_external_location.some, databricks_storage_credential.external, null_resource.wait_for_iam_propagation ]
 }
+
+resource "databricks_grants" "current_user_use_schema" {
+
+  catalog = databricks_catalog.unity-demo-catalog.name
+
+  grant {
+    principal  = var.grant_principal
+  privileges = ["USE_CATALOG", "USE_SCHEMA", "CREATE_SCHEMA", "CREATE_TABLE", "MODIFY", "SELECT", "MANAGE"]
+  }
+  grant {
+    principal  = data.databricks_current_user.me.user_name
+    privileges = ["USE_CATALOG", "USE_SCHEMA", "CREATE_SCHEMA", "CREATE_TABLE", "MODIFY", "SELECT", "MANAGE"]
+  }
+  depends_on = [ databricks_storage_credential.external, null_resource.wait_for_iam_propagation ]
+}
+
+# resource "databricks_grants" "current_user_manage_tables" {
+
+#   schema = "${data.databricks_catalog.tableflow_delta.name}.${var.confluent_cluster_id}"
+
+#   grant {
+#     principal  = data.databricks_current_user.me.user_name
+#   privileges = ["MANAGE"]
+#   }
+#   depends_on = [ databricks_storage_credential.external, null_resource.wait_for_iam_propagation ]
+# }
+
+
+
+
+
 
 resource "databricks_directory" "shared_dir" {
   path = var.shared_dir_path

@@ -95,3 +95,8 @@ variable "kafka_topic_id" {
   default     = "NULL"
 }
 
+variable "random_suffix" {
+  description = "A random suffix to append to resource names."
+  type        = string
+  default     = "string"
+}
