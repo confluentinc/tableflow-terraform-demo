@@ -19,6 +19,7 @@ resource "databricks_storage_credential" "external" {
     role_arn = var.aws_iam_role_arn
   }
   comment = "Managed by TF"
+  
 }
 
 resource "null_resource" "wait_for_iam_propagation" {

@@ -3,9 +3,20 @@ provider "confluent" {
   cloud_api_secret = var.confluent_cloud_api_secret
 }
 
+module "tagging" {
+    source          = "git::ssh://git@github.com/confluentinc/cc-terraform-cost-eng.git//modules/tagging?ref=origin/master"
+    environment     = "devel"
+    service         = "tableflow-demo"
+    repository_name = "tableflow-terraform-demo.git"
+}
+
 provider "aws" {
   region = var.aws_region
-}
+    default_tags {
+        tags = module.tagging.cflt_aws_tags
+    }
+  }
+
 
 provider "snowflake" {
   account_name = var.polaris_account_name
