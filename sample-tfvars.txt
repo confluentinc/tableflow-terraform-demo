@@ -51,3 +51,4 @@ databricks_token = "YOUR_DATABRICKS_PERSONAL_ACCESS_TOKEN"
 databricks_sql_warehouse_name = "YOUR_DATABRICKS_SQL_WAREHOUSE_NAME"
 databricks_client_id = "YOUR_DATABRICKS_CLIENT_ID"
 
+>>>>>>> ffe7854ef8dbc21baf46feb3872a42f91d79b70a

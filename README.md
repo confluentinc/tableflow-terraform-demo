@@ -15,6 +15,7 @@ This Terraform project will:
 
 ![Architecture Diagram](tableflow-demo.drawio.png)
 
+
 ## Prerequisites
 
 - **Confluent Cloud Account**: Sign up at https://confluent.cloud/ if you don’t have one.
@@ -40,6 +41,7 @@ This Terraform project will:
    git clone <your-repo-url>
    cd tableflow-project
    ```
+
 
 ## Required Variables
 
