@@ -1,88 +1,149 @@
-# Tableflow Project
+# Tableflow Terraform Demo
 
-This project contains Terraform scripts to provision and configure resources for a data pipeline using AWS and Confluent Cloud. The pipeline integrates Kafka topics, IAM roles, S3 storage, and Confluent Tableflow for managing data streams and schemas. **This project is designed for demonstration purposes and supports integration with AWS Glue or Snowflake for downstream data processing.**
+This project contains Terraform scripts to provision and configure a modern data pipeline using Confluent Cloud, AWS, and (optionally) Databricks and Snowflake. It automates the creation of Kafka topics, IAM roles, S3 buckets, and all necessary integrations for Tableflow and streaming analytics.
 
 ## Overview
 
-The Terraform scripts in this project perform the following tasks:
-- Create Kafka topics (`stock_trades` and `users`) in Confluent Cloud.
-- Configure a Datagen Source Connector to generate sample data for the `stock_trades` and `users` topics.
-- Set up an S3 bucket and IAM roles/policies for BYOB (Bring Your Own Bucket) integration with Confluent Tableflow.
-- Provision a Confluent Tableflow topic (`stock_trades`) with Iceberg table format.
-- Manage API keys for Kafka and Tableflow access
-
+This Terraform project will:
+- Create and configure Confluent Cloud environments, Kafka clusters, topics, and API keys.
+- Set up AWS S3 buckets and IAM roles for secure data storage and access.
+- Integrate with Databricks and/or Snowflake for downstream analytics (optional).
+- Provision sample data generators and schema registry resources.
+- Manage all resources as code for easy reproducibility and teardown.
 
 ## Architecture
-![](tableflow-demo.drawio.png)
+
+![Architecture Diagram](tableflow-demo.drawio.png)
 
 
 ## Prerequisites
 
-Before using these scripts, ensure you have:
-1. **AWS Account**: Required for S3 bucket and IAM role creation.
-2. Make sure you configure your aws account locally by running `aws configure`
-3. **Confluent Cloud Account**: Required for Kafka, Tableflow, and connector provisioning.
+- **Confluent Cloud Account**: Sign up at https://confluent.cloud/ if you don’t have one.
+- **AWS Account**: Sign up at https://aws.amazon.com/ if you don’t have one.
+- **Terraform**: Install Terraform (v1.0 or newer) from https://developer.hashicorp.com/terraform/downloads
+- **AWS CLI**: Install from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+### Initial Setup
+
+1. **Configure AWS CLI**  
+   Run:  
+   ```sh
+   aws configure
+   ```
+   Enter your AWS Access Key, Secret Key, region, and output format.
+
+2. **Get Confluent Cloud Credentials**  
+   - Log in to Confluent Cloud.
+   - Create an API Key and Secret for your environment (see Confluent Cloud documentation).
+
+3. **Clone this repository**  
+   ```sh
+   git clone <your-repo-url>
+   cd tableflow-project
+   ```
 
 
 ## Required Variables
 
-You need to define the following variables in a `variables.tf` file or provide them via environment variables or a `.tfvars` file:
+You can provide variables in a `terraform.tfvars` file (recommended), or set them as environment variables.
 
-### Confluent Cloud Variables (Required)
-- `confluent_cloud_api_key` (string): Confluent Cloud API Key
-- `confluent_cloud_api_secret` (string, sensitive): Confluent Cloud API Secret
+### Confluent Cloud
+- `confluent_cloud_api_key` (string): Your Confluent Cloud API Key
+- `confluent_cloud_api_secret` (string, sensitive): Your Confluent Cloud API Secret
 
-### Environment Display Names (Required)
-- `glue_environment_display_name` (string): Display name for the Glue environment
-- `snowflake_environment_display_name` (string, optional): Display name for the Snowflake environment
-- `databricks_environment_display_name` (string, optional): Display name for the Databricks environment
+### Environment
+- `environment_display_name` (string): Name for your Confluent environment (e.g., "My Tableflow Demo")
 
-### AWS Variables (Required)
-- `aws_region` (string): AWS region
+### Catalog Types
+- `catalog_types` (list(string)): Which integrations to enable. Example: `["databricks", "snowflake"]`
 
-### Snowflake Variables (Optional, for Snowflake integration)
-- `snowflake_endpoint` (string, sensitive): Snowflake endpoint
-- `snowflake_warehouse` (string): Snowflake warehouse
-- `snowflake_allowed_scope` (string): Snowflake allowed scope (e.g., `PRINCIPAL_ROLE:<my-principal-role>`)
+### AWS
+- `aws_region` (string): AWS region (e.g., "us-east-1")
 
-### Polaris Variables (Optional, for Snowflake Open Data/Polaris integration)
-- `polaris_client_id` (string, sensitive): Polaris Client ID
-- `polaris_client_secret` (string, sensitive): Polaris Client Secret
+### Snowflake (optional, for Snowflake integration)
+- `snowflake_endpoint` (string): Snowflake endpoint URL
+- `snowflake_warehouse` (string): Snowflake warehouse name
+- `snowflake_allowed_scope` (string): Allowed scope for Snowflake integration
+
+### Polaris (optional, for Snowflake Open Data/Polaris integration)
+- `polaris_client_id` (string): Polaris Client ID
+- `polaris_client_secret` (string): Polaris Client Secret
 - `polaris_account_name` (string): Polaris account name
 - `polaris_username` (string): Polaris username
-- `polaris_password` (string, sensitive): Polaris password
+- `polaris_password` (string): Polaris password
 - `polaris_region` (string): Polaris region
 
-### Databricks Variables (Optional, for Databricks integration)
+### Databricks (optional, for Databricks integration)
 - `databricks_workspace_id` (string): Databricks workspace ID
 - `databricks_workspace_name` (string): Databricks workspace name
 - `databricks_account_id` (string): Databricks account ID
 - `databricks_host` (string): Databricks workspace host URL
-- `databricks_token` (string, sensitive): Databricks workspace token
+- `databricks_token` (string): Databricks workspace token
+- `databricks_sql_warehouse_name` (string): Databricks SQL warehouse name
+- `databricks_client_id` (string): Databricks OAuth client ID
 
+## How to Run
 
+1. **Initialize Terraform**
+   ```sh
+   terraform init
+   ```
 
-## Deployment Steps
+2. **Review the Plan**
+   ```sh
+   terraform plan
+   ```
 
-1. Clone this repository and navigate to the project directory.
-2. Define the required variables in a `variables.tf` file or a `.tfvars` file.
-3. Run `terraform init` to initialize the Terraform project.
-4. Run `terraform plan` to preview the changes.
-5. Run `terraform apply` to provision the resources.
+3. **Apply the Configuration**
+   ```sh
+   terraform apply -auto-approve
+   ```
+   - This will provision all resources without prompting for confirmation.
+
+4. **Check Outputs**
+   - Terraform will print important outputs (API keys, S3 bucket names, etc.) after a successful run.
 
 ## Outputs
 
-After deployment, the following outputs will be available:
-- `kafka_api_key`: The Kafka API key.
-- `kafka_api_secret`: The Kafka API secret (sensitive).
-- `s3_access_role_arn`: The ARN of the S3 access role.
-- `s3_bucket_name`: The name of the S3 bucket.
+- `confluent_environment_id`: The ID of the Confluent Cloud environment.
+- `kafka_cluster_ids`: Map of all Kafka cluster IDs, keyed by cluster name.
+- `kafka_rest_endpoints`: Map of all Kafka cluster REST endpoints, keyed by cluster name.
+- `iam_role_names`: Map of all IAM role names created, keyed by cluster name.
+- `iam_role_arns`: Map of all IAM role ARNs created, keyed by cluster name.
+- `s3_bucket_names`: Map of all S3 bucket names created, keyed by cluster name.
+- `tableflow_topic_ids`: Map of Tableflow topic IDs, keyed by cluster name.
+- `tableflow_topic_names`: Map of Tableflow topic display names, keyed by cluster name.
+- `tableflow_topic_statuses`: Map of Tableflow topic statuses, keyed by cluster name.
+- `provider_integration_role_arns`: Map of provider integration IAM role ARNs, keyed by cluster name.
+- `provider_integration_external_ids`: Map of provider integration external IDs, keyed by cluster name.
+- `provider_integration_internal_ids`: Map of provider integration internal IDs, keyed by cluster name.
 
 ## Notes
 
-- Ensure that your AWS and Confluent credentials are properly configured before running the scripts.
-- The `prevent_destroy` lifecycle rule is set to `false` for API keys to allow re-creation if needed.
-- Review the `depends_on` blocks to understand resource dependencies and avoid circular dependencies.
-- This project supports integration with AWS Glue or Snowflake for downstream data processing.
+- All sensitive variables (API secrets, tokens, passwords) should be kept secure and never committed to version control.
+- The project supports multiple catalog integrations; enable only those you need via `catalog_types`.
+- For more details, see the comments in each `.tf` file.
 
-For more details, refer to the individual `.tf` files in the project.
+---
+
+If you have questions, please refer to the Confluent Cloud and Terraform documentation, or open an issue in this repository.
+
+
+# Future Iterations
+[✔️] Implement Databricks External Location Integration
+
+[✔️] Customized Catalog Integrations for Demos
+
+[✔️] Everything launched in a single Environment
+
+[  ] All catalogs integrated with one catalog (Pending Terraform Support)
+
+[  ] Finalize Unity Catalog Integration (Pending Terraform Support)
+
+[  ] Leverage Snowflake External Database Linking
+
+
+# Contributing
+If you would like to contribute to this repository, please fork and submit a pull request with your suggested changes.
+
+

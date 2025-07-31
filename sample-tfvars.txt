@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Confluent Cloud Configuration
 # Your Confluent Cloud API Key. This can be generated in the Confluent Cloud UI.
 confluent_cloud_api_key    = "YOUR_CONFLUENT_CLOUD_API_KEY"
@@ -50,17 +49,6 @@ databricks_host = "https://YOUR_DATABRICKS_HOST_URL"
 databricks_token = "YOUR_DATABRICKS_PERSONAL_ACCESS_TOKEN"
 # The name of the Databricks SQL Warehouse to connect to.
 databricks_sql_warehouse_name = "YOUR_DATABRICKS_SQL_WAREHOUSE_NAME"
+databricks_client_id = "YOUR_DATABRICKS_CLIENT_ID"
 
-=======
-# Cloud key
-confluent_cloud_api_key = "ABC123"
-confluent_cloud_api_secret = "ABC123"
-environment_display_name = "my-environment"
-
-# ignore if not using Snowflake
-polaris_client_id = "ABC123" 
-polaris_client_secret = "ABC123="
-snowflake_endpoint = "https://my-endpoint.us-east-1.snowflakecomputing.com"
-snowflake_warehouse = "polaris"
-snowflake_allowed_scope = "PRINCIPAL_ROLE:polarisuserrole"
->>>>>>> origin/master
+>>>>>>> ffe7854ef8dbc21baf46feb3872a42f91d79b70a

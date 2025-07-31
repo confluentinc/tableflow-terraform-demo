@@ -1,5 +1,5 @@
 {
-        "namespace": "ksql",
+        "namespace": "flink",
         "name": "users",
         "type": "record",
         "fields": [
