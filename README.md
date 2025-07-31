@@ -129,10 +129,15 @@ If you have questions, please refer to the Confluent Cloud and Terraform documen
 
 # Future Iterations
 [✔️] Implement Databricks External Location Integration
+
 [✔️] Customized Catalog Integrations for Demos
+
 [✔️] Everything launched in a single Environment
+
 [  ] All catalogs integrated with one catalog (Pending Terraform Support)
+
 [  ] Finalize Unity Catalog Integration (Pending Terraform Support)
+
 [  ] Leverage Snowflake External Database Linking
 
 
