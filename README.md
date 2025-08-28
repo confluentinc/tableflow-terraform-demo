@@ -46,17 +46,17 @@ Run:
    ```sh
    databricks configure
    ```
-**How to find Databricks Host (databricks_host):**
-- Log in to your Databricks workspace.
-- Copy the URL from your browser’s address bar.
-- Example: https://dbc-xxxxxx-yyyy.cloud.databricks.com
-- Use this as the value for databricks_host.
+   **How to find Databricks Host (databricks_host):**
+   - Log in to your Databricks workspace.
+   - Copy the URL from your browser’s address bar.
+   - Example: https://dbc-xxxxxx-yyyy.cloud.databricks.com
+   - Use this as the value for databricks_host.
 
-**How to find personal access token:**
-- In the Databricks console, click your user icon (top right) and select User Settings.
-- Go to the Access Tokens tab.
-- Click Generate New Token, give it a name, and copy the generated token.
-- Use this as the value for databricks_token.
+   **How to find personal access token:**
+   - In the Databricks console, click your user icon (top right) and select User Settings.
+   - Go to the Access Tokens tab.
+   - Click Generate New Token, give it a name, and copy the generated token.
+   - Use this as the value for databricks_token.
 
 3. **Get Confluent Cloud Credentials**  
 - Log in to Confluent Cloud.
