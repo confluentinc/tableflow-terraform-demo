@@ -19,6 +19,8 @@ This Terraform project will:
 ## Prerequisites
 
 - **Confluent Cloud Account**: Sign up at https://confluent.cloud/ if you don’t have one.
+- **Confluent CLI** https://docs.confluent.io/confluent-cli/current/install.html#cli-install. 
+   > Run `confluent login` to set the proper auth credentials.
 - **AWS Account**: Sign up at https://aws.amazon.com/ if you don’t have one.
 - **Terraform**: Install Terraform (v1.0 or newer) from https://developer.hashicorp.com/terraform/downloads
 - **AWS CLI**: Install from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
