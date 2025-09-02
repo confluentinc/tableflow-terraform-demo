@@ -3,12 +3,7 @@ provider "confluent" {
   cloud_api_secret = var.confluent_cloud_api_secret
 }
 
-locals {
-  tagging_module = try(
-    module.tagging,
-    {}
-  )
-}
+
 
 # Uncomment if on Confluent VPN for internal tagging module access
 # module "tagging" {
@@ -20,12 +15,13 @@ locals {
 
 provider "aws" {
   region = var.aws_region
-    dynamic "default_tags" {
-      for_each = module.tagging != {} ? [1] : []
-      content {
-        tags = module.tagging.cflt_aws_tags
-      }
-    }
+    # Uncomment if on Confluent VPN for internal tagging module access
+    # dynamic "default_tags" {
+    #   for_each = module.tagging != {} ? [1] : []
+    #   content {
+    #     tags = module.tagging.cflt_aws_tags
+    #   }
+    # }
   }
 
 
