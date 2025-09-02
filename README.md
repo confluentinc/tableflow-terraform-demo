@@ -19,9 +19,18 @@ This Terraform project will:
 ## Prerequisites
 
 - **Confluent Cloud Account**: Sign up at https://confluent.cloud/ if you don’t have one.
+- **Confluent CLI** https://docs.confluent.io/confluent-cli/current/install.html#cli-install. 
+   > Run `confluent login` to set the proper auth credentials.
 - **AWS Account**: Sign up at https://aws.amazon.com/ if you don’t have one.
 - **Terraform**: Install Terraform (v1.0 or newer) from https://developer.hashicorp.com/terraform/downloads
 - **AWS CLI**: Install from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+- **Databricks CLI**: Install using pip:
+   ```sh
+   pip install databricks-cli
+   ```
+   For more details, see the [Databricks CLI documentation](https://docs.databricks.com/en/dev-tools/cli/index.html).
+
+--------------
 
 ### Initial Setup
 
@@ -32,20 +41,40 @@ This Terraform project will:
    ```
    Enter your AWS Access Key, Secret Key, region, and output format.
 
-2. **Get Confluent Cloud Credentials**  
-   - Log in to Confluent Cloud.
-   - Create an API Key and Secret for your environment (see Confluent Cloud documentation).
+----------------
 
-3. **Clone this repository**  
+2. **Configure Databricks CLI** (if using Databricks resources)
+Run: 
+   ```sh
+   databricks configure
+   ```
+   **How to find Databricks Host (databricks_host):**
+   - Log in to your Databricks workspace.
+   - Copy the URL from your browser’s address bar.
+   - Example: https://dbc-xxxxxx-yyyy.cloud.databricks.com
+   - Use this as the value for databricks_host.
+
+   **How to find personal access token:**
+   - In the Databricks console, click your user icon (top right) and select User Settings.
+   - Go to the Access Tokens tab.
+   - Click Generate New Token, give it a name, and copy the generated token.
+   - Use this as the value for databricks_token.
+
+3. **Get Confluent Cloud Credentials**  
+- Log in to Confluent Cloud.
+- Create an API Key and Secret for your environment (see Confluent Cloud documentation).
+
+4. **Clone this repository**  
    ```sh
    git clone <your-repo-url>
    cd tableflow-project
    ```
 
+----------------
 
 ## Required Variables
 
-You can provide variables in a `terraform.tfvars` file (recommended), or set them as environment variables.
+You can provide variables in a `terraform.tfvars` file (see `sample-tfvars.txt` for reference), or set them as environment variables. The easiest way is to copy `sample-tfvars.txt` into a file called `terraform.tfvars` and fill in the placeholders.
 
 ### Confluent Cloud
 - `confluent_cloud_api_key` (string): Your Confluent Cloud API Key
@@ -55,7 +84,7 @@ You can provide variables in a `terraform.tfvars` file (recommended), or set the
 - `environment_display_name` (string): Name for your Confluent environment (e.g., "My Tableflow Demo")
 
 ### Catalog Types
-- `catalog_types` (list(string)): Which integrations to enable. Example: `["databricks", "snowflake"]`
+- `catalog_types` (list(string)): Which integrations to enable. Example: `["databricks", "snowflake", "glue"]`
 
 ### AWS
 - `aws_region` (string): AWS region (e.g., "us-east-1")
