@@ -111,6 +111,10 @@ You can provide variables in a `terraform.tfvars` file (see `sample-tfvars.txt` 
 - `databricks_sql_warehouse_name` (string): Databricks SQL warehouse name
 - `databricks_client_id` (string): Databricks OAuth client ID
 
+
+### Internal Note
+If you are running from within Confleunt VPN, you can uncomment `providers.tf` related to tagging module in order to get automatic tags for your AWS resources.
+
 ## How to Run
 
 1. **Initialize Terraform**
