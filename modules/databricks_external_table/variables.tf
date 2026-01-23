@@ -3,9 +3,16 @@ variable "storage_credential_name" {
   type        = string
 }
 
-variable "aws_iam_role_arn" {
-  description = "The ARN of the AWS IAM role to use for Databricks."
+variable "cloud_provider" {
+  description = "Cloud provider (aws, azure, gcp)"
   type        = string
+}
+
+# AWS-specific variables
+variable "aws_iam_role_arn" {
+  description = "The ARN of the AWS IAM role to use for Databricks (required only for AWS)."
+  type        = string
+  default     = null
 }
 
 variable "iam_role_id" {
@@ -28,9 +35,41 @@ variable "external_location_name" {
   type        = string
 }
 
-variable "s3_bucket_name" {
-  description = "The name of the S3 bucket."
+variable "storage_location_name" {
+  description = "The storage location name (S3 bucket name for AWS, container name for Azure)."
   type        = string
+}
+
+# Azure-specific variables
+variable "azure_tenant_id" {
+  description = "Azure Tenant ID (required only for Azure)"
+  type        = string
+  default     = null
+}
+
+variable "azure_application_id" {
+  description = "Azure Application (Client) ID (required only for Azure)"
+  type        = string
+  default     = null
+}
+
+variable "azure_client_secret" {
+  description = "Azure Client Secret (required only for Azure)"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "container_name" {
+  description = "Azure ADLS container name (required only for Azure)"
+  type        = string
+  default     = null
+}
+
+variable "storage_account_name" {
+  description = "Azure Storage Account name (required only for Azure)"
+  type        = string
+  default     = null
 }
 
 variable "catalog_type" {
@@ -71,7 +110,7 @@ variable "databricks_token" {
   default     = "NULL"
 }
 
-variable "confluent_organization_id" {  
+variable "confluent_organization_id" {
   description = "The Confluent organization ID."
   type        = string
   default     = "NULL"

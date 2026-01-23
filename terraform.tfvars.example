@@ -7,8 +7,24 @@ confluent_cloud_api_secret = "YOUR_CONFLUENT_CLOUD_API_SECRET"
 # Environment Display Names
 # A user-friendly name for your Confluent Cloud environment.
 environment_display_name = "YOUR_ENVIRONMENT_DISPLAY_NAME"
-# A list of catalog types (e.g., "databricks", "snowflake", "glue") that will be used.
-catalog_types            = ["databricks", "snowflake", "glue"] # Customize as needed
+
+# ============================================
+# Cloud Provider Configuration
+# ============================================
+# Choose your cloud provider: "aws" or "azure"
+# Default: "aws" (for backward compatibility)
+cloud_provider = "aws" # Options: "aws", "azure"
+
+# A list of catalog types that will be used.
+# AWS-only: "glue"
+# Azure-only: "fabric"
+# Both clouds: "databricks", "snowflake"
+catalog_types = ["databricks", "snowflake", "glue"] # Customize based on cloud_provider
+
+# Region Configuration
+# For AWS: use format like "us-east-1", "eu-west-2"
+# For Azure: use format like "eastus", "westus2"
+region = "us-east-1" # Change to appropriate region for your cloud provider
 
 # Snowflake Configuration
 # The endpoint URL for your Snowflake account.
@@ -32,9 +48,11 @@ polaris_password      = "YOUR_POLARIS_PASSWORD"
 # The AWS region where your Polaris instance is deployed (e.g., "us-east-1").
 polaris_region        = "YOUR_POLARIS_REGION"
 
-# AWS Configuration
-# The AWS region where your resources will be deployed (e.g., "us-east-1").
-aws_region = "YOUR_AWS_REGION"
+# ============================================
+# AWS-Specific Configuration (if cloud_provider = "aws")
+# ============================================
+# DEPRECATED: Use 'region' instead. Kept for backward compatibility.
+# aws_region = "YOUR_AWS_REGION"
 
 # Databricks Configuration
 # The ID of your Databricks workspace. Found in the Databricks URL (e.g., after '?o=').
@@ -51,4 +69,24 @@ databricks_token = "YOUR_DATABRICKS_PERSONAL_ACCESS_TOKEN"
 databricks_sql_warehouse_name = "YOUR_DATABRICKS_SQL_WAREHOUSE_NAME"
 databricks_client_id = "YOUR_DATABRICKS_CLIENT_ID"
 
->>>>>>> ffe7854ef8dbc21baf46feb3872a42f91d79b70a
+# ============================================
+# Azure-Specific Configuration (if cloud_provider = "azure")
+# ============================================
+# Azure Subscription ID (found in Azure Portal)
+# Only required if cloud_provider = "azure"
+azure_subscription_id = "YOUR_AZURE_SUBSCRIPTION_ID"
+
+# Azure Tenant ID (found in Azure Active Directory)
+# Only required if cloud_provider = "azure"
+# Can be auto-detected if you're logged in via 'az login'
+azure_tenant_id = "YOUR_AZURE_TENANT_ID"
+
+# Azure Resource Group name for storage resources
+# Only used if cloud_provider = "azure"
+azure_resource_group_name = "tableflow-rg"
+
+# Azure Storage Account name prefix (3-15 lowercase alphanumeric chars)
+# Must be globally unique across all Azure
+# Only used if cloud_provider = "azure"
+azure_storage_account_name_prefix = "cflttflow"
+

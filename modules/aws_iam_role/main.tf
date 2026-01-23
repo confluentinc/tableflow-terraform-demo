@@ -12,15 +12,15 @@ resource "aws_iam_role" "s3_access_role" {
   description = "IAM role for accessing S3 with a trust policy for Confluent Tableflow"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
-    Statement = flatten(concat( 
+    Version = "2012-10-17"
+    Statement = flatten(concat(
       [
         {
-          Effect    = "Allow"
+          Effect = "Allow"
           Principal = {
             AWS = var.provider_integration_role_arn
           }
-          Action    = "sts:AssumeRole"
+          Action = "sts:AssumeRole"
           Condition = {
             StringEquals = {
               "sts:ExternalId" = var.provider_integration_external_id
@@ -28,20 +28,20 @@ resource "aws_iam_role" "s3_access_role" {
           }
         },
         {
-          Effect    = "Allow"
+          Effect = "Allow"
           Principal = {
             AWS = var.provider_integration_role_arn
           }
-          Action    = "sts:TagSession"
+          Action = "sts:TagSession"
         }
       ],
       [
-        for val in (var.provider_type == "databricks" ? [true] : []) : [ 
-          { 
-            Effect    = "Allow"
-            Action    = "sts:AssumeRole"
+        for val in(var.provider_type == "databricks" ? [true] : []) : [
+          {
+            Effect = "Allow"
+            Action = "sts:AssumeRole"
             Principal = {
-              AWS = "arn:aws:iam::414351767826:root"
+              AWS = var.databricks_unity_catalog_iam_arn
             }
             Condition = {
               StringEquals = {
@@ -49,12 +49,12 @@ resource "aws_iam_role" "s3_access_role" {
               }
             }
           },
-          { 
-            Effect    = "Allow"
-            Action    = "sts:AssumeRole"
+          {
+            Effect = "Allow"
+            Action = "sts:AssumeRole"
             Principal = {
               AWS = [
-                "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL",
+                var.databricks_unity_catalog_role_arn,
                 "arn:aws:iam::${var.aws_account_id}:root"
               ]
             }
@@ -67,7 +67,7 @@ resource "aws_iam_role" "s3_access_role" {
               }
             }
           }
-        ] 
+        ]
       ]
     ))
   })
@@ -78,12 +78,12 @@ resource "aws_iam_policy" "s3_access_policy" {
   name        = "TableflowS3AccessPolicy-${var.provider_type}-${var.random_suffix}"
   description = "IAM policy for accessing the S3 bucket for Confluent Tableflow"
 
-  policy      = jsonencode({
-    Version   = "2012-10-17"
+  policy = jsonencode({
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject",

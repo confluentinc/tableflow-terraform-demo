@@ -14,13 +14,24 @@ variable "topic_name" {
 }
 
 variable "catalog_type" {
-  description = "The catalog type (e.g., glue, snowflake, databricks)."
+  description = "The catalog type (e.g., glue, snowflake, databricks, fabric)."
   type        = string
 }
 
-variable "s3_bucket_name" {
-  description = "The S3 bucket name for BYOB storage."
+variable "cloud_provider" {
+  description = "Cloud provider (aws, azure, gcp)"
   type        = string
+}
+
+variable "storage_location_name" {
+  description = "The storage location name (S3 bucket name for AWS, container name for Azure)."
+  type        = string
+}
+
+variable "azure_storage_account_name" {
+  description = "Azure Storage Account name (required only for Azure)"
+  type        = string
+  default     = null
 }
 
 variable "provider_integration_id" {

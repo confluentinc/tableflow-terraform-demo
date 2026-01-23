@@ -31,11 +31,22 @@ variable "random_suffix" {
 variable "databricks_account_id" {
   description = "The Databricks account ID for the role assumption."
   type        = string
-  default = "NULL"
+  default     = "NULL"
 }
 
 variable "aws_account_id" {
   description = "The AWS account ID where the role will be created."
   type        = string
-  
+}
+
+variable "databricks_unity_catalog_iam_arn" {
+  description = "The Databricks Unity Catalog IAM root ARN for trust policy."
+  type        = string
+  default     = "arn:aws:iam::414351767826:root"
+}
+
+variable "databricks_unity_catalog_role_arn" {
+  description = "The Databricks Unity Catalog master role ARN for trust policy."
+  type        = string
+  default     = "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL"
 }

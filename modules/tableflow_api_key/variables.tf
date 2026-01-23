@@ -1,7 +1,7 @@
 variable "service_account_id" {
   description = "The ID of the service account that will own the API key."
   type        = string
-  
+
 }
 
 variable "service_account_api_version" {

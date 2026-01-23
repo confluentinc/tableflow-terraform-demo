@@ -8,7 +8,7 @@ terraform {
 }
 
 
-data "confluent_schema_registry_cluster" "essentials" { 
+data "confluent_schema_registry_cluster" "essentials" {
   environment {
     id = var.environment_id
   }

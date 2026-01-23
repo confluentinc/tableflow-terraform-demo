@@ -3,8 +3,13 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "aws_region" {
-  description = "The AWS region for the Kafka cluster."
+variable "cloud_provider" {
+  description = "Cloud provider for the Kafka cluster (aws, azure, gcp)"
+  type        = string
+}
+
+variable "region" {
+  description = "The cloud region for the Kafka cluster."
   type        = string
 }
 

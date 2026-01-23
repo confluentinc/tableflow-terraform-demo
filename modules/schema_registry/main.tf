@@ -22,9 +22,9 @@ resource "confluent_schema" "avro-stock-trades" {
     id = data.confluent_schema_registry_cluster.essentials.id
   }
   rest_endpoint = data.confluent_schema_registry_cluster.essentials.rest_endpoint
-  subject_name = "${var.stock_topic_name}-value"
-  format = "AVRO"
-  schema = file("${path.module}/schemas/avro/stock_trades.avsc")
+  subject_name  = "${var.stock_topic_name}-value"
+  format        = "AVRO"
+  schema        = file("${path.root}/schemas/avro/stock_trades.avsc")
   credentials {
     key    = var.schema_registry_api_key
     secret = var.schema_registry_api_secret
@@ -41,9 +41,9 @@ resource "confluent_schema" "avro-users" {
     id = data.confluent_schema_registry_cluster.essentials.id
   }
   rest_endpoint = data.confluent_schema_registry_cluster.essentials.rest_endpoint
-  subject_name = "${var.users_topic_name}-value"
-  format = "AVRO"
-  schema = file("${path.module}/schemas/avro/users.avsc")
+  subject_name  = "${var.users_topic_name}-value"
+  format        = "AVRO"
+  schema        = file("${path.root}/schemas/avro/users.avsc")
   credentials {
     key    = var.schema_registry_api_key
     secret = var.schema_registry_api_secret
@@ -52,6 +52,6 @@ resource "confluent_schema" "avro-users" {
   lifecycle {
     prevent_destroy = false
   }
-  
+
 }
 

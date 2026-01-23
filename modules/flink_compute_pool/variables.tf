@@ -11,13 +11,13 @@ variable "display_name" {
 variable "cloud" {
   description = "The cloud provider for the Flink compute pool (e.g., aws, gcp, azure)."
   type        = string
-  default = "AWS"
+  default     = "AWS"
 }
 
 variable "region" {
   description = "The region for the Flink compute pool."
   type        = string
-  default = "us-east-1"
+  default     = "us-east-1"
 }
 
 variable "max_cfu" {

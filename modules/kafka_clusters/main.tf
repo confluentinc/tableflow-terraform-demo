@@ -10,8 +10,8 @@ terraform {
 resource "confluent_kafka_cluster" "my_cluster" {
   display_name = var.cluster_name
   availability = "SINGLE_ZONE"
-  cloud        = "AWS"
-  region       = var.aws_region
+  cloud        = upper(var.cloud_provider) # "AWS" or "AZURE"
+  region       = var.region
   standard {}
 
   environment {

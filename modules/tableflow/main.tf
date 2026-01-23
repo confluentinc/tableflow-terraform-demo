@@ -19,9 +19,23 @@ resource "confluent_tableflow_topic" "this" {
   # Set table format based on catalog_type
   table_formats = var.catalog_type == "databricks" ? ["DELTA", "ICEBERG"] : ["ICEBERG"]
 
-  byob_aws {
-    bucket_name             = var.s3_bucket_name
-    provider_integration_id = var.provider_integration_id
+  # AWS BYOB configuration
+  dynamic "byob_aws" {
+    for_each = var.cloud_provider == "aws" ? [1] : []
+    content {
+      bucket_name             = var.storage_location_name
+      provider_integration_id = var.provider_integration_id
+    }
+  }
+
+  # Azure BYOB configuration
+  dynamic "byob_azure" {
+    for_each = var.cloud_provider == "azure" ? [1] : []
+    content {
+      container_name          = var.storage_location_name
+      storage_account_name    = var.azure_storage_account_name
+      provider_integration_id = var.provider_integration_id
+    }
   }
 
   credentials {

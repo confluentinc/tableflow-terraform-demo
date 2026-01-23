@@ -16,7 +16,7 @@ resource "confluent_catalog_integration" "unity_catalog" {
     id = var.kafka_cluster_id
   }
   display_name = "catalog-integration-snowflake"
-  
+
   unity {
     catalog_name = var.catalog_name
     catalog_type = var.catalog_type

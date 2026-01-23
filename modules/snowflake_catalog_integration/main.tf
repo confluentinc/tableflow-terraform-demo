@@ -17,11 +17,11 @@ resource "confluent_catalog_integration" "snowflake_catalog" {
   }
   display_name = "catalog-integration-snowflake"
   snowflake {
-    endpoint       = var.snowflake_endpoint
-    warehouse      = var.snowflake_warehouse
-    allowed_scope  = var.snowflake_allowed_scope
-    client_id      = var.polaris_client_id
-    client_secret  = var.polaris_client_secret
+    endpoint      = var.snowflake_endpoint
+    warehouse     = var.snowflake_warehouse
+    allowed_scope = var.snowflake_allowed_scope
+    client_id     = var.polaris_client_id
+    client_secret = var.polaris_client_secret
   }
   credentials {
     key    = var.tableflow_api_key

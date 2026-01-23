@@ -36,5 +36,11 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# MacOS files
 .DS_Store
-.terraform.lock.hcl
+
+# WarpStream data directory
+warpstream/
+
+# Note: .terraform.lock.hcl should be committed to version control
+# to ensure consistent provider versions across all environments

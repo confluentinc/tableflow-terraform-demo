@@ -1,3 +1,13 @@
+# Cloud-aware locals
+locals {
+  # Backward compatibility: use aws_region if specified, otherwise use region
+  effective_region = var.aws_region != null ? var.aws_region : var.region
+
+  # Cloud provider flags
+  is_aws   = var.cloud_provider == "aws"
+  is_azure = var.cloud_provider == "azure"
+}
+
 module "confluent_env_module" {
   source               = "./modules/confluent_environment"
   environment_name     = var.environment_display_name
@@ -10,7 +20,8 @@ module "kafka_clusters" {
   for_each           = toset(var.catalog_types)
   source             = "./modules/kafka_clusters"
   cluster_name       = each.key
-  aws_region         = var.aws_region
+  cloud_provider     = var.cloud_provider
+  region             = local.effective_region
   environment_id     = module.confluent_env_module.environment_id
   service_account_id = confluent_service_account.my_service_account.id
 
@@ -131,37 +142,79 @@ module "datagen_users" {
 }
 
 
+# AWS S3 Buckets (conditional - only for AWS)
 module "aws_s3_bucket" {
-  for_each      = module.kafka_clusters
+  for_each      = local.is_aws ? module.kafka_clusters : {}
   source        = "./modules/aws_s3_bucket"
   provider_name = each.key
   bucket_suffix = random_integer.suffix.result
+}
 
+# Azure ADLS Containers (conditional - only for Azure)
+module "azure_adls_container" {
+  for_each               = local.is_azure ? module.kafka_clusters : {}
+  source                 = "./modules/azure_adls_container"
+  catalog_name           = each.key
+  resource_group_name    = var.azure_resource_group_name
+  region                 = local.effective_region
+  storage_account_prefix = var.azure_storage_account_name_prefix
+  random_suffix          = random_integer.suffix.result
 }
 
 
 locals {
+  # Storage resource names (S3 bucket or ADLS container)
+  storage_names = {
+    for k in keys(module.kafka_clusters) :
+    k => local.is_aws ? module.aws_s3_bucket[k].bucket_name : module.azure_adls_container[k].container_name
+  }
+
+  # Storage account names (Azure only)
+  storage_account_names = {
+    for k in keys(module.kafka_clusters) :
+    k => local.is_azure ? module.azure_adls_container[k].storage_account_name : null
+  }
+
+  # AWS IAM role names
   iam_role_names = {
     for k in keys(module.kafka_clusters) :
     k => "tableflow-role-${k}-${random_integer.suffix.result}"
   }
-  customer_s3_access_role_arns = {
+
+  # AWS IAM role ARNs
+  customer_s3_access_role_arns = local.is_aws ? {
     for k in keys(module.kafka_clusters) :
-    k => "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.iam_role_names[k]}"
-  }
+    k => "arn:aws:iam::${data.aws_caller_identity.current[0].account_id}:role/${local.iam_role_names[k]}"
+  } : {}
 }
 
 module "provider_integration" {
-  for_each          = module.kafka_clusters
-  source            = "./modules/provider_integration"
-  environment_id    = module.confluent_env_module.environment_id
-  provider_name     = each.key
-  customer_role_arn = local.customer_s3_access_role_arns[each.key]
-  depends_on        = [module.confluent_env_module, module.aws_s3_bucket, module.kafka_clusters]
+  for_each       = module.kafka_clusters
+  source         = "./modules/provider_integration"
+  environment_id = module.confluent_env_module.environment_id
+  provider_name  = each.key
+  cloud_provider = var.cloud_provider
+
+  # AWS-specific
+  customer_role_arn = local.is_aws ? local.customer_s3_access_role_arns[each.key] : null
+
+  # Azure-specific
+  azure_tenant_id            = local.is_azure ? var.azure_tenant_id : null
+  azure_application_id       = local.is_azure ? module.azure_service_principal[each.key].client_id : null
+  azure_application_secret   = local.is_azure ? module.azure_service_principal[each.key].client_secret : null
+  azure_storage_account_name = local.is_azure ? local.storage_account_names[each.key] : null
+
+  depends_on = [
+    module.confluent_env_module,
+    module.aws_s3_bucket,
+    module.azure_adls_container,
+    module.kafka_clusters
+  ]
 }
 
+# AWS IAM Roles (conditional - only for AWS)
 module "aws_iam_role" {
-  for_each                         = module.kafka_clusters
+  for_each                         = local.is_aws ? module.kafka_clusters : {}
   source                           = "./modules/aws_iam_role"
   customer_role_name               = local.iam_role_names[each.key]
   s3_bucket_name                   = module.aws_s3_bucket[each.key].bucket_name
@@ -169,9 +222,18 @@ module "aws_iam_role" {
   provider_integration_external_id = module.provider_integration[each.key].provider_integration_external_id
   provider_type                    = each.key
   random_suffix                    = random_integer.suffix.result
-  aws_account_id                   = data.aws_caller_identity.current.account_id
+  aws_account_id                   = data.aws_caller_identity.current[0].account_id
   databricks_account_id            = contains(var.catalog_types, "databricks") ? var.databricks_account_id : null
+}
 
+# Azure Service Principals (conditional - only for Azure)
+module "azure_service_principal" {
+  for_each           = local.is_azure ? module.kafka_clusters : {}
+  source             = "./modules/azure_service_principal"
+  catalog_name       = each.key
+  storage_account_id = module.azure_adls_container[each.key].storage_account_id
+  random_suffix      = random_integer.suffix.result
+  azure_tenant_id    = var.azure_tenant_id
 }
 
 
@@ -187,19 +249,22 @@ module "tableflow_api_key" {
 
 # tableflow for stock_trades topic only
 module "tableflow_stock_trades" {
-  for_each                = module.kafka_clusters
-  source                  = "./modules/tableflow"
-  environment_id          = module.confluent_env_module.environment_id
-  kafka_cluster_id        = each.value.cluster_id
-  topic_name              = module.kafka_topic_stock_trades[each.key].topic_name
-  catalog_type            = each.key
-  s3_bucket_name          = module.aws_s3_bucket[each.key].bucket_name
-  provider_integration_id = module.provider_integration[each.key].provider_integration_internal_id
-  api_key                 = module.tableflow_api_key.api_key
-  api_secret              = module.tableflow_api_key.api_secret
+  for_each                   = module.kafka_clusters
+  source                     = "./modules/tableflow"
+  environment_id             = module.confluent_env_module.environment_id
+  kafka_cluster_id           = each.value.cluster_id
+  topic_name                 = module.kafka_topic_stock_trades[each.key].topic_name
+  catalog_type               = each.key
+  cloud_provider             = var.cloud_provider
+  storage_location_name      = local.storage_names[each.key]
+  azure_storage_account_name = local.is_azure ? local.storage_account_names[each.key] : null
+  provider_integration_id    = module.provider_integration[each.key].provider_integration_internal_id
+  api_key                    = module.tableflow_api_key.api_key
+  api_secret                 = module.tableflow_api_key.api_secret
 
   depends_on = [
     module.aws_iam_role,
+    module.azure_service_principal,
     module.kafka_topic_stock_trades,
     module.tableflow_api_key,
     data.confluent_schema_registry_cluster.essentials,
@@ -208,9 +273,9 @@ module "tableflow_stock_trades" {
   ]
 }
 
-# catalog integration (only if "glue" is in catalog_types)
+# Glue catalog integration (only if "glue" is in catalog_types AND cloud_provider is AWS)
 module "glue_catalog_integration" {
-  count = contains(var.catalog_types, "glue") ? 1 : 0
+  count = local.is_aws && contains(var.catalog_types, "glue") ? 1 : 0
 
   source                           = "./modules/glue_catalog_integration"
   environment_id                   = module.confluent_env_module.environment_id
@@ -219,6 +284,20 @@ module "glue_catalog_integration" {
   provider_integration_internal_id = module.provider_integration["glue"].provider_integration_internal_id
   tableflow_api_key                = module.tableflow_api_key.api_key
   tableflow_api_secret             = module.tableflow_api_key.api_secret
+}
+
+# Microsoft Fabric catalog integration (only if "fabric" is in catalog_types AND cloud_provider is Azure)
+module "fabric_catalog_integration" {
+  count = local.is_azure && contains(var.catalog_types, "fabric") ? 1 : 0
+
+  source                           = "./modules/fabric_catalog_integration"
+  environment_id                   = module.confluent_env_module.environment_id
+  catalog_type                     = "fabric"
+  cluster_id                       = module.kafka_clusters["fabric"].cluster_id
+  provider_integration_internal_id = module.provider_integration["fabric"].provider_integration_internal_id
+  tableflow_api_key                = module.tableflow_api_key.api_key
+  tableflow_api_secret             = module.tableflow_api_key.api_secret
+  azure_tenant_id                  = var.azure_tenant_id
 }
 
 # catalog integration (only if "snowflake" is in catalog_types)
@@ -239,52 +318,54 @@ module "snowflake_catalog_integration" {
 }
 
 module "flink_compute_pool" {
-  for_each           = module.kafka_clusters
-  source             = "./modules/flink_compute_pool"
-  environment_id     = module.confluent_env_module.environment_id
-  display_name      = "flink-compute-pool-${each.key}"
-  depends_on         = [module.kafka_clusters, module.api_keys]
+  for_each       = module.kafka_clusters
+  source         = "./modules/flink_compute_pool"
+  environment_id = module.confluent_env_module.environment_id
+  display_name   = "flink-compute-pool-${each.key}"
+  depends_on     = [module.kafka_clusters, module.api_keys]
 }
 
 module "databricks_external_table" {
   count = contains(var.catalog_types, "databricks") ? 1 : 0
 
-  source                   = "./modules/databricks_external_table"
-  storage_credential_name  = "tableflow-external-credential-${random_integer.suffix.result}"
-  aws_iam_role_arn         = module.aws_iam_role["databricks"].role_arn
-  iam_role_id              = module.aws_iam_role["databricks"].role_id
-  iam_policy_id            = module.aws_iam_role["databricks"].policy_id
-  iam_policy_attachment_id = module.aws_iam_role["databricks"].iam_policy_attachment_id
-  external_location_name   = "tableflow-external-location-${random_integer.suffix.result}"
-  s3_bucket_name           = module.aws_s3_bucket["databricks"].bucket_name
-  catalog_type             = "databricks"
-  grant_principal          = var.databricks_client_id
-  shared_dir_path          = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
-  sql_warehouse_id         =  data.databricks_sql_warehouse.my_existing_warehouse[0].id
-  query_display_name       = "Tableflow External Table Query ${random_integer.suffix.result}"
-  databricks_host          = var.databricks_host
-  databricks_token         = var.databricks_token
+  source                  = "./modules/databricks_external_table"
+  storage_credential_name = "tableflow-external-credential-${random_integer.suffix.result}"
+  cloud_provider          = var.cloud_provider
+
+  # AWS-specific variables
+  aws_iam_role_arn         = local.is_aws ? module.aws_iam_role["databricks"].role_arn : null
+  iam_role_id              = local.is_aws ? module.aws_iam_role["databricks"].role_id : ""
+  iam_policy_id            = local.is_aws ? module.aws_iam_role["databricks"].policy_id : ""
+  iam_policy_attachment_id = local.is_aws ? module.aws_iam_role["databricks"].iam_policy_attachment_id : ""
+
+  # Azure-specific variables
+  azure_tenant_id      = local.is_azure ? var.azure_tenant_id : null
+  azure_application_id = local.is_azure ? module.azure_service_principal["databricks"].client_id : null
+  azure_client_secret  = local.is_azure ? module.azure_service_principal["databricks"].client_secret : null
+  container_name       = local.is_azure ? local.storage_names["databricks"] : null
+  storage_account_name = local.is_azure ? local.storage_account_names["databricks"] : null
+
+  external_location_name    = "tableflow-external-location-${random_integer.suffix.result}"
+  storage_location_name     = local.storage_names["databricks"]
+  catalog_type              = "databricks"
+  grant_principal           = var.databricks_client_id
+  shared_dir_path           = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
+  sql_warehouse_id          = data.databricks_sql_warehouse.my_existing_warehouse[0].id
+  query_display_name        = "Tableflow External Table Query ${random_integer.suffix.result}"
+  databricks_host           = var.databricks_host
+  databricks_token          = var.databricks_token
   confluent_organization_id = data.confluent_organization.current.id
   confluent_environment_id  = module.confluent_env_module.environment_id
   confluent_cluster_id      = module.kafka_clusters["databricks"].cluster_id
   kafka_topic_id            = module.kafka_topic_stock_trades["databricks"].topic_id
-  random_suffix = random_integer.suffix.result
-  depends_on = [     module.aws_iam_role["databricks"],
-    module.aws_s3_bucket["databricks"],
+  random_suffix             = random_integer.suffix.result
+
+  depends_on = [
+    module.aws_iam_role,
+    module.azure_service_principal,
+    module.aws_s3_bucket,
+    module.azure_adls_container,
     module.datagen_stock_trades["databricks"],
-    module.datagen_users["databricks"]]
-
+    module.datagen_users["databricks"]
+  ]
 }
-
-# module "unity_catalog_integration" {
-#   count = contains(var.catalog_types, "databricks") ? 1 : 0
-
-#   source = "./modules/unity_catalog_integration"
-
-#   environment_id          = module.confluent_env_module.environment_id
-#   kafka_cluster_id        = module.kafka_clusters["databricks"].cluster_id
-#   catalog_name            = "tableflow_catalog"
-#   catalog_type            = "databricks"
-#   tableflow_api_key       = module.tableflow_api_key.api_key
-#   tableflow_api_secret    = module.tableflow_api_key.api_secret
-# }

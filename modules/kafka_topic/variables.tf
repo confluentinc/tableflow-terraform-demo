@@ -10,7 +10,7 @@ variable "api_secret" {
 
 variable "topic_name" {
   description = "Name of the Kafka topic to create."
-  type        = string 
+  type        = string
 }
 
 variable "cluster_id" {
