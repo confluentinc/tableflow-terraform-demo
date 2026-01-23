@@ -8,15 +8,16 @@
 
 The following Confluent Terraform resources do not have Azure support:
 
-### 1. `confluent_provider_integration`
+### 1. `confluent_provider_integration` ⚠️ **BLOCKER**
 - ❌ No `azure` block available
 - ✅ Only `aws` block supported
-- **Impact**: Cannot create provider integration for Azure storage
+- **Impact**: Cannot create provider integration for Azure storage via Terraform
+- **This is the primary blocker** - without this, full automation is impossible
 
 ### 2. `confluent_tableflow_topic`
-- ❌ No `byob_azure` block available
-- ✅ Only `byob_aws` block supported
-- **Impact**: Cannot configure Azure ADLS as Tableflow storage
+- ✅ **Azure storage IS supported** via `azure_data_lake_storage_gen_2` block
+- ⚠️ **BUT** requires `provider_integration_id` which cannot be created via Terraform (see #1)
+- **Impact**: Tableflow can use Azure ADLS, but provider integration must be created manually first
 
 ### 3. `confluent_catalog_integration`
 - ❌ No `fabric` catalog type support

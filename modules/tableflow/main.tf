@@ -28,18 +28,15 @@ resource "confluent_tableflow_topic" "this" {
     }
   }
 
-  # Azure BYOB configuration
-  # CRITICAL LIMITATION: As of Confluent provider v2.58.0, byob_azure is NOT supported
-  # See AZURE_LIMITATION.md for details
-  #
-  # dynamic "byob_azure" {
-  #   for_each = var.cloud_provider == "azure" ? [1] : []
-  #   content {
-  #     container_name          = var.storage_location_name
-  #     storage_account_name    = var.azure_storage_account_name
-  #     provider_integration_id = var.provider_integration_id
-  #   }
-  # }
+  # Azure Data Lake Storage Gen2 configuration
+  dynamic "azure_data_lake_storage_gen_2" {
+    for_each = var.cloud_provider == "azure" ? [1] : []
+    content {
+      container_name          = var.storage_location_name
+      storage_account_name    = var.azure_storage_account_name
+      provider_integration_id = var.provider_integration_id
+    }
+  }
 
   credentials {
     key    = var.api_key

@@ -25,15 +25,10 @@ resource "confluent_provider_integration" "main" {
   }
 
   # Azure Provider Integration
-  # CRITICAL LIMITATION: As of Confluent provider v2.58.0, Azure BYOB is NOT supported
-  # in the Terraform provider. The 'azure' block does not exist in confluent_provider_integration.
+  # CRITICAL LIMITATION: As of Confluent provider v2.58.0, the 'azure' block does NOT exist
+  # in confluent_provider_integration. This is the PRIMARY BLOCKER for Azure automation.
   #
-  # Azure support must be configured manually through:
-  # 1. Confluent Cloud UI
-  # 2. Confluent Cloud REST API
-  # 3. Wait for future Confluent provider version that adds Azure support
-  #
-  # Commenting out until Azure is supported in the Confluent Terraform provider:
+  # Uncomment when Confluent adds Azure support to the provider:
   #
   # dynamic "azure" {
   #   for_each = var.cloud_provider == "azure" ? [1] : []
@@ -44,12 +39,4 @@ resource "confluent_provider_integration" "main" {
   #     storage_account_name = var.azure_storage_account_name
   #   }
   # }
-
-  # Validation: Fail if Azure is selected (not supported yet)
-  lifecycle {
-    precondition {
-      condition     = var.cloud_provider != "azure"
-      error_message = "Azure BYOB is not yet supported in Confluent Terraform provider v2.58.0. Please use AWS or wait for Azure support to be added to the provider."
-    }
-  }
 }
