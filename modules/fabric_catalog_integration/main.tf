@@ -1,37 +1,50 @@
 # Microsoft Fabric Catalog Integration for Tableflow
-# Note: This is a placeholder module. Full Confluent provider support for Microsoft Fabric
-# may require manual configuration steps. Refer to the README.md for setup instructions.
+#
+# CRITICAL LIMITATION: As of Confluent Terraform Provider v2.58.0, Microsoft Fabric
+# is NOT supported. The confluent_catalog_integration resource only supports:
+# - aws_glue
+# - snowflake
+#
+# This module is a PLACEHOLDER for future Fabric support. See AZURE_LIMITATION.md.
 
 terraform {
   required_providers {
-    confluent = {
-      source  = "confluentinc/confluent"
-      version = ">= 2.32.0"
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.0"
     }
   }
 }
 
-resource "confluent_catalog_integration" "fabric" {
-  display_name = "fabric_catalog_integration"
-  environment {
-    id = var.environment_id
-  }
-
-  # Note: The specific configuration for Microsoft Fabric integration
-  # depends on the Confluent provider version and API support.
-  # This may require manual setup through the Confluent Cloud UI
-  # or Azure Portal for Fabric workspace integration.
-
-  # Placeholder for future Fabric-specific configuration
-  # fabric {
-  #   workspace_id = var.fabric_workspace_id
-  #   tenant_id    = var.azure_tenant_id
-  # }
-}
-
-# Output a note about manual setup if needed
-resource "null_resource" "fabric_setup_notice" {
+# Placeholder resource that does nothing but provides a module structure
+# ready for when Fabric support is added to the Confluent provider
+resource "null_resource" "fabric_not_supported_notice" {
   provisioner "local-exec" {
-    command = "echo 'Note: Microsoft Fabric integration may require additional manual setup. See module README for details.'"
+    command = "echo 'WARNING: Microsoft Fabric catalog integration is not supported in Confluent Terraform provider v2.58.0. See AZURE_LIMITATION.md for manual setup instructions.'"
+  }
+
+  triggers = {
+    environment_id = var.environment_id
+    cluster_id     = var.cluster_id
   }
 }
+
+# Future implementation (when Confluent provider adds Fabric support):
+#
+# resource "confluent_catalog_integration" "fabric" {
+#   display_name = "fabric_catalog_integration"
+#   environment {
+#     id = var.environment_id
+#   }
+#   kafka_cluster {
+#     id = var.cluster_id
+#   }
+#   fabric {
+#     workspace_id = var.fabric_workspace_id
+#     tenant_id    = var.azure_tenant_id
+#   }
+#   credentials {
+#     key    = var.tableflow_api_key
+#     secret = var.tableflow_api_secret
+#   }
+# }

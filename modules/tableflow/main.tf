@@ -29,14 +29,17 @@ resource "confluent_tableflow_topic" "this" {
   }
 
   # Azure BYOB configuration
-  dynamic "byob_azure" {
-    for_each = var.cloud_provider == "azure" ? [1] : []
-    content {
-      container_name          = var.storage_location_name
-      storage_account_name    = var.azure_storage_account_name
-      provider_integration_id = var.provider_integration_id
-    }
-  }
+  # CRITICAL LIMITATION: As of Confluent provider v2.58.0, byob_azure is NOT supported
+  # See AZURE_LIMITATION.md for details
+  #
+  # dynamic "byob_azure" {
+  #   for_each = var.cloud_provider == "azure" ? [1] : []
+  #   content {
+  #     container_name          = var.storage_location_name
+  #     storage_account_name    = var.azure_storage_account_name
+  #     provider_integration_id = var.provider_integration_id
+  #   }
+  # }
 
   credentials {
     key    = var.api_key

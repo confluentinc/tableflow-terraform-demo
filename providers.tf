@@ -8,16 +8,19 @@ provider "aws" {
   region = var.aws_region != null ? var.aws_region : var.region
 }
 
-# Azure Resource Manager Provider (only used when cloud_provider = azure)
+# Azure Resource Manager Provider (configured but not used - Azure not supported in Confluent provider v2.58.0)
+# NOTE: Azure BYOB is not yet supported in Confluent Terraform provider.
+# See AZURE_LIMITATION.md for details.
+# These providers are configured to satisfy module requirements but won't be used when cloud_provider = "aws"
+
 provider "azurerm" {
   features {}
-  subscription_id            = var.cloud_provider == "azure" ? var.azure_subscription_id : null
-  skip_provider_registration = true
+  resource_provider_registrations = "none"
+  subscription_id = var.azure_subscription_id != "NULL" ? var.azure_subscription_id : null
 }
 
-# Azure Active Directory Provider (only used when cloud_provider = azure)
 provider "azuread" {
-  tenant_id = var.cloud_provider == "azure" ? var.azure_tenant_id : null
+  tenant_id = var.azure_tenant_id != "NULL" ? var.azure_tenant_id : null
 }
 
 
@@ -39,7 +42,7 @@ data "aws_caller_identity" "current" {
   count = var.cloud_provider == "aws" ? 1 : 0
 }
 
-# Azure data sources (conditional - only for Azure)
+# Azure data sources (configured but not used when cloud_provider = "aws")
 data "azurerm_client_config" "current" {
   count = var.cloud_provider == "azure" ? 1 : 0
 }
