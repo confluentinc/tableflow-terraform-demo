@@ -7,36 +7,50 @@ terraform {
   }
 }
 
-resource "confluent_provider_integration" "main" {
+# AWS Provider Integration (single resource pattern)
+resource "confluent_provider_integration" "aws" {
+  count = var.cloud_provider == "aws" ? 1 : 0
+
   display_name = "${var.cloud_provider}_tableflow_integration_${var.provider_name}"
   environment {
     id = var.environment_id
   }
 
-  # AWS Provider Integration
-  # During the creation of confluent_provider_integration.main, the IAM role does not yet exist.
-  # The role will be created after confluent_provider_integration.main is provisioned
+  # During the creation of confluent_provider_integration, the IAM role does not yet exist.
+  # The role will be created after confluent_provider_integration is provisioned
   # by the s3_access_role module using the specified target name.
-  dynamic "aws" {
-    for_each = var.cloud_provider == "aws" ? [1] : []
-    content {
-      customer_role_arn = var.customer_role_arn
-    }
+  aws {
+    customer_role_arn = var.customer_role_arn
+  }
+}
+
+# Azure Provider Integration (two-step pattern)
+# Step 1: Setup the provider integration
+resource "confluent_provider_integration_setup" "azure" {
+  count = var.cloud_provider == "azure" ? 1 : 0
+
+  display_name = "${var.cloud_provider}_tableflow_integration_${var.provider_name}"
+  environment {
+    id = var.environment_id
   }
 
-  # Azure Provider Integration
-  # CRITICAL LIMITATION: As of Confluent provider v2.58.0, the 'azure' block does NOT exist
-  # in confluent_provider_integration. This is the PRIMARY BLOCKER for Azure automation.
-  #
-  # Uncomment when Confluent adds Azure support to the provider:
-  #
-  # dynamic "azure" {
-  #   for_each = var.cloud_provider == "azure" ? [1] : []
-  #   content {
-  #     tenant_id            = var.azure_tenant_id
-  #     application_id       = var.azure_application_id
-  #     application_secret   = var.azure_application_secret
-  #     storage_account_name = var.azure_storage_account_name
-  #   }
-  # }
+  cloud = "AZURE"
 }
+
+# Step 2: Authorize the provider integration with Azure tenant
+resource "confluent_provider_integration_authorization" "azure" {
+  count = var.cloud_provider == "azure" ? 1 : 0
+
+  provider_integration_id = confluent_provider_integration_setup.azure[0].id
+
+  environment {
+    id = var.environment_id
+  }
+
+  azure {
+    customer_azure_tenant_id = var.azure_tenant_id
+  }
+}
+
+# GCP Provider Integration (placeholder for future implementation)
+# GCP follows the same two-step pattern as Azure

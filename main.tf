@@ -199,10 +199,7 @@ module "provider_integration" {
   customer_role_arn = local.is_aws ? local.customer_s3_access_role_arns[each.key] : null
 
   # Azure-specific
-  azure_tenant_id            = local.is_azure ? var.azure_tenant_id : null
-  azure_application_id       = local.is_azure ? module.azure_service_principal[each.key].client_id : null
-  azure_application_secret   = local.is_azure ? module.azure_service_principal[each.key].client_secret : null
-  azure_storage_account_name = local.is_azure ? local.storage_account_names[each.key] : null
+  azure_tenant_id = local.is_azure ? var.azure_tenant_id : null
 
   depends_on = [
     module.confluent_env_module,
@@ -227,13 +224,17 @@ module "aws_iam_role" {
 }
 
 # Azure Service Principals (conditional - only for Azure)
+# Creates service principal for Confluent's multi-tenant application
 module "azure_service_principal" {
-  for_each           = local.is_azure ? module.kafka_clusters : {}
-  source             = "./modules/azure_service_principal"
-  catalog_name       = each.key
-  storage_account_id = module.azure_adls_container[each.key].storage_account_id
-  random_suffix      = random_integer.suffix.result
-  azure_tenant_id    = var.azure_tenant_id
+  for_each                       = local.is_azure ? module.kafka_clusters : {}
+  source                         = "./modules/azure_service_principal"
+  catalog_name                   = each.key
+  storage_account_id             = module.azure_adls_container[each.key].storage_account_id
+  confluent_multi_tenant_app_id  = module.provider_integration[each.key].azure_confluent_multi_tenant_app_id
+
+  depends_on = [
+    module.provider_integration
+  ]
 }
 
 
