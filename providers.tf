@@ -3,9 +3,12 @@ provider "confluent" {
   cloud_api_secret = var.confluent_cloud_api_secret
 }
 
-# AWS Provider (works for both AWS and Azure deployments, but only actively used for AWS)
+# AWS Provider (configured but only actively used for AWS deployments)
+# When using Azure, we still need to configure AWS provider but it won't be used
 provider "aws" {
-  region = var.aws_region != null ? var.aws_region : var.region
+  region = var.aws_region != null ? var.aws_region : (
+    var.cloud_provider == "aws" ? var.region : "us-east-1"  # Default AWS region when using other clouds
+  )
 }
 
 # Azure Resource Manager Provider (configured but not used - Azure not supported in Confluent provider v2.58.0)
