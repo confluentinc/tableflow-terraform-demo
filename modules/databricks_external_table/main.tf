@@ -114,7 +114,8 @@ resource "databricks_grants" "current_user_use_schema" {
 
 
 resource "databricks_directory" "shared_dir" {
-  path = var.shared_dir_path
+  path           = var.shared_dir_path
+  delete_recursive = true
 }
 
 resource "databricks_query" "this" {

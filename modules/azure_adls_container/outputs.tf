@@ -22,3 +22,8 @@ output "primary_dfs_endpoint" {
   description = "The primary DFS endpoint for ADLS Gen2 operations"
   value       = azurerm_storage_account.adls.primary_dfs_endpoint
 }
+
+output "resource_group_id" {
+  description = "The ID of the resource group"
+  value       = data.azurerm_resource_group.tableflow.id
+}

@@ -9,6 +9,11 @@ terraform {
   }
 }
 
+# Get resource group data for outputs
+data "azurerm_resource_group" "tableflow" {
+  name = var.resource_group_name
+}
+
 resource "azurerm_storage_account" "adls" {
   name                     = "${var.storage_account_prefix}${var.catalog_name}${var.random_suffix}"
   resource_group_name      = var.resource_group_name

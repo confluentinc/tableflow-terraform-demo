@@ -237,6 +237,22 @@ module "azure_service_principal" {
   ]
 }
 
+# Azure Confluent Multi-Tenant Service Principal Permissions (conditional - only for Azure)
+# Grants Confluent service principal permissions to access storage
+module "azure_confluent_sp_permissions" {
+  for_each                                = local.is_azure ? module.kafka_clusters : {}
+  source                                  = "./modules/azure_confluent_sp_permissions"
+  confluent_service_principal_object_id   = module.azure_service_principal[each.key].confluent_service_principal_object_id
+  storage_account_id                      = module.azure_adls_container[each.key].storage_account_id
+  resource_group_id                       = module.azure_adls_container[each.key].resource_group_id
+
+  depends_on = [
+    module.provider_integration,
+    module.azure_adls_container,
+    module.azure_service_principal
+  ]
+}
+
 
 # create tableflow api key
 module "tableflow_api_key" {
@@ -266,6 +282,7 @@ module "tableflow_stock_trades" {
   depends_on = [
     module.aws_iam_role,
     module.azure_service_principal,
+    module.azure_confluent_sp_permissions,
     module.kafka_topic_stock_trades,
     module.tableflow_api_key,
     data.confluent_schema_registry_cluster.essentials,
@@ -341,8 +358,8 @@ module "databricks_external_table" {
 
   # Azure-specific variables
   azure_tenant_id      = local.is_azure ? var.azure_tenant_id : null
-  azure_application_id = local.is_azure ? module.azure_service_principal["databricks"].client_id : null
-  azure_client_secret  = local.is_azure ? module.azure_service_principal["databricks"].client_secret : null
+  azure_application_id = local.is_azure ? module.azure_service_principal["databricks"].databricks_client_id : null
+  azure_client_secret  = local.is_azure ? module.azure_service_principal["databricks"].databricks_client_secret : null
   container_name       = local.is_azure ? local.storage_names["databricks"] : null
   storage_account_name = local.is_azure ? local.storage_account_names["databricks"] : null
 

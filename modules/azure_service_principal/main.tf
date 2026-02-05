@@ -54,24 +54,24 @@ resource "azuread_application_password" "databricks" {
   }
 }
 
-# For other catalogs: Create service principal for Confluent's multi-tenant application
+# For ALL catalogs: Create service principal for Confluent's multi-tenant application
+# This is the service principal that Tableflow uses to write data to Azure storage
 resource "azuread_service_principal" "confluent" {
-  count     = local.is_databricks ? 0 : 1
   client_id = var.confluent_multi_tenant_app_id
 }
 
-# Role assignment for Databricks
+# Role assignment for Databricks Unity Catalog
+# Grants Databricks service principal access to storage for Unity Catalog
 resource "azurerm_role_assignment" "databricks_storage_access" {
   count                = local.is_databricks ? 1 : 0
   scope                = var.storage_account_id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azuread_service_principal.databricks[0].object_id
-}
 
-# Role assignment for Confluent (non-Databricks)
-resource "azurerm_role_assignment" "storage_blob_data_contributor" {
-  count                = local.is_databricks ? 0 : 1
-  scope                = var.storage_account_id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azuread_service_principal.confluent[0].object_id
+  skip_service_principal_aad_check = true
+
+  timeouts {
+    create = "5m"
+    delete = "5m"
+  }
 }
