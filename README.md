@@ -37,7 +37,7 @@ This project provisions:
 ## Quick Start
 
 ```sh
-git clone <your-repo-url>
+git clone https://github.com/confluentinc/tableflow-terraform-demo
 cd tableflow-project
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your credentials (see the file for detailed guidance)
