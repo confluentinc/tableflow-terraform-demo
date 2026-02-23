@@ -18,3 +18,8 @@ output "databricks_service_principal_object_id" {
   description = "The Object ID of the Databricks service principal (null if not Databricks)"
   value       = local.is_databricks ? azuread_service_principal.databricks[0].object_id : null
 }
+
+output "databricks_service_principal_display_name" {
+  description = "The display name of the Databricks Azure AD application (null if not Databricks)"
+  value       = local.is_databricks ? azuread_application.databricks[0].display_name : null
+}

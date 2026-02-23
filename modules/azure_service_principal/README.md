@@ -28,7 +28,7 @@ module "azure_service_principal" {
 
 | Name | Description | Type | Required |
 |------|-------------|------|----------|
-| catalog_name | Name of the catalog (e.g., databricks, snowflake, fabric) | string | Yes |
+| catalog_name | Name of the catalog (e.g., databricks, snowflake) | string | Yes |
 | storage_account_id | The ID of the Azure Storage Account to grant access to | string | Yes |
 | random_suffix | Random suffix to ensure uniqueness | string | Yes |
 | azure_tenant_id | Azure Tenant ID | string | Yes |
@@ -45,7 +45,7 @@ module "azure_service_principal" {
 
 ## Role Assignments
 
-### Standard Catalogs (Snowflake, Fabric)
+### Standard Catalogs (Snowflake)
 - **Storage Blob Data Contributor**: Allows read, write, and delete access to blob data
 
 ### Databricks Unity Catalog

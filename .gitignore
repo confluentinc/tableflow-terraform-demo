@@ -44,3 +44,12 @@ warpstream/
 
 # Note: .terraform.lock.hcl should be committed to version control
 # to ensure consistent provider versions across all environments
+
+# Log files
+*.log
+
+# Terraform plan output
+tfplan
+
+# Shell scripts (keep out of root)
+*.sh

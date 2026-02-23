@@ -24,6 +24,8 @@ terraform {
   }
 }
 
+data "azuread_client_config" "current" {}
+
 locals {
   is_databricks = var.catalog_name == "databricks"
 }
@@ -32,6 +34,7 @@ locals {
 resource "azuread_application" "databricks" {
   count        = local.is_databricks ? 1 : 0
   display_name = "tableflow-databricks-${var.catalog_name}"
+  owners       = [data.azuread_client_config.current.object_id]
 }
 
 resource "azuread_service_principal" "databricks" {
@@ -45,10 +48,10 @@ resource "time_rotating" "databricks_secret_rotation" {
 }
 
 resource "azuread_application_password" "databricks" {
-  count                 = local.is_databricks ? 1 : 0
-  application_id        = azuread_application.databricks[0].id
-  display_name          = "tableflow-databricks-secret"
-  end_date_relative     = "8760h" # 1 year
+  count             = local.is_databricks ? 1 : 0
+  application_id    = azuread_application.databricks[0].id
+  display_name      = "tableflow-databricks-secret"
+  end_date_relative = "8760h" # 1 year
   rotate_when_changed = {
     rotation = time_rotating.databricks_secret_rotation[0].id
   }

@@ -4,7 +4,7 @@ variable "confluent_multi_tenant_app_id" {
 }
 
 variable "catalog_name" {
-  description = "Name of the catalog (e.g., databricks, snowflake, fabric)"
+  description = "Name of the catalog (e.g., databricks, snowflake)"
   type        = string
 }
 

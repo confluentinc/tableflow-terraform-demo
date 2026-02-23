@@ -26,7 +26,7 @@ module "azure_adls_container" {
 
 | Name | Description | Type | Required |
 |------|-------------|------|----------|
-| catalog_name | Name of the catalog (e.g., databricks, snowflake, fabric) | string | Yes |
+| catalog_name | Name of the catalog (e.g., databricks, snowflake) | string | Yes |
 | resource_group_name | Name of the Azure Resource Group | string | Yes |
 | region | Azure region for the storage account | string | Yes |
 | storage_account_prefix | Prefix for the storage account name (3-15 lowercase alphanumeric) | string | Yes |

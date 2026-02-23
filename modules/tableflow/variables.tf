@@ -14,7 +14,7 @@ variable "topic_name" {
 }
 
 variable "catalog_type" {
-  description = "The catalog type (e.g., glue, snowflake, databricks, fabric)."
+  description = "The catalog type (e.g., glue, snowflake, databricks)."
   type        = string
 }
 

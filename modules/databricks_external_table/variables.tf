@@ -47,6 +47,12 @@ variable "azure_tenant_id" {
   default     = null
 }
 
+variable "azure_access_connector_id" {
+  description = "Azure Databricks Access Connector resource ID (preferred over service principal for Azure)"
+  type        = string
+  default     = null
+}
+
 variable "azure_application_id" {
   description = "Azure Application (Client) ID (required only for Azure)"
   type        = string
@@ -77,9 +83,16 @@ variable "catalog_type" {
   type        = string
 }
 
-variable "grant_principal" {
-  description = "The principal to grant privileges to."
+variable "grant_principals" {
+  description = "List of principals to grant privileges to (e.g. service principal application IDs, user emails)."
+  type        = list(string)
+  default     = []
+}
+
+variable "databricks_sp_application_id" {
+  description = "The Azure AD application (client) ID of the Databricks service principal to register in the workspace (Azure only)."
   type        = string
+  default     = null
 }
 
 variable "shared_dir_path" {

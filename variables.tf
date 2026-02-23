@@ -27,15 +27,15 @@ variable "cloud_provider" {
 }
 
 variable "catalog_types" {
-  description = "A list of catalog types (e.g., 'glue', 'snowflake', 'databricks', 'fabric') for which to provision resources. An empty list will provision no resources. Note: 'glue' is AWS-only, 'fabric' is Azure-only."
+  description = "A list of catalog types (e.g., 'glue', 'snowflake', 'databricks') for which to provision resources. An empty list will provision no resources. Note: 'glue' is AWS-only."
   type        = list(string)
   default     = ["glue", "snowflake", "databricks"]
 
   validation {
     condition = alltrue([
-      for t in var.catalog_types : contains(["glue", "snowflake", "databricks", "fabric"], t)
+      for t in var.catalog_types : contains(["glue", "snowflake", "databricks"], t)
     ])
-    error_message = "Each catalog_type must be one of: glue, snowflake, databricks, fabric."
+    error_message = "Each catalog_type must be one of: glue, snowflake, databricks."
   }
 }
 
@@ -127,15 +127,49 @@ variable "aws_region" {
 
 # Databricks Variables
 
-variable "databricks_workspace_id" {
-  description = "The ID of the Databricks workspace"
+variable "databricks_workspace_url" {
+  description = "Optional Databricks workspace URL. If provided for Azure, uses pre-existing workspace. If null/empty for Azure, auto-provisions workspace. Required for AWS."
   type        = string
-  default     = "NULL"
+  default     = null
+
+  validation {
+    condition     = var.databricks_workspace_url == null || var.databricks_workspace_url == "" || can(regex("^https://.*", var.databricks_workspace_url))
+    error_message = "Must be a valid HTTPS URL or null/empty."
+  }
 }
+
+variable "databricks_workspace_id" {
+  description = "Databricks workspace ID (required only if using pre-existing Azure workspace). Format: numeric ID like '1819879799926523'"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.databricks_workspace_id == null || var.databricks_workspace_id == "" || can(regex("^[0-9]+$", var.databricks_workspace_id))
+    error_message = "Must be a numeric workspace ID or null/empty."
+  }
+}
+
 variable "databricks_account_id" {
-  description = "The account ID of the Databricks workspace"
+  description = "Databricks account ID (required for Unity Catalog metastore creation)"
   type        = string
   default     = "NULL"
+
+  validation {
+    condition     = var.databricks_account_id == "NULL" || can(regex("^[a-f0-9-]{36}$", var.databricks_account_id))
+    error_message = "Must be a valid UUID format or 'NULL'."
+  }
+}
+
+variable "databricks_metastore_id" {
+  description = "Existing Unity Catalog metastore ID to use (optional). For shared accounts, provide the existing metastore ID to skip metastore creation."
+  type        = string
+  default     = null
+}
+
+variable "databricks_skip_metastore_assignment" {
+  description = "Skip Unity Catalog metastore assignment (set to true for shared accounts where you lack admin permissions - metastore must be manually assigned by an administrator)"
+  type        = bool
+  default     = false
 }
 
 variable "databricks_workspace_name" {
@@ -146,18 +180,32 @@ variable "databricks_workspace_name" {
 }
 
 variable "databricks_host" {
-  description = "The host URL of the Databricks workspace"
+  description = "DEPRECATED: Use databricks_workspace_url instead. Legacy workspace URL for backward compatibility."
   type        = string
   default     = "NULL"
 
   validation {
     condition     = var.databricks_host == "NULL" || can(regex("^https://.*\\.cloud\\.databricks\\.com", var.databricks_host))
-    error_message = "Must be a valid Databricks workspace URL (e.g., https://dbc-xxxxx-yyyy.cloud.databricks.com) or 'NULL'."
+    error_message = "Must be a valid Databricks workspace URL or 'NULL'."
   }
 }
 
+variable "databricks_workspace_token" {
+  description = "Workspace-level Databricks PAT token for workspace resources (SQL warehouses, queries). Required for AWS. Required for Azure pre-existing workspace mode."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "databricks_account_token" {
+  description = "Account-level Databricks PAT token for Unity Catalog metastore management. Required for Azure auto-provision mode. Get from https://accounts.azuredatabricks.net"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
 variable "databricks_token" {
-  description = "The token for the Databricks workspace"
+  description = "DEPRECATED: Use databricks_workspace_token or databricks_account_token instead. Legacy token for backward compatibility."
   type        = string
   sensitive   = true
   default     = "NULL"

@@ -1,92 +1,124 @@
-# Confluent Cloud Configuration
-# Your Confluent Cloud API Key. This can be generated in the Confluent Cloud UI.
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                     CONFLUENT CLOUD TABLEFLOW DEMO                         ║
+# ║                                                                            ║
+# ║  Copy this file to terraform.tfvars and fill in the values below.          ║
+# ║  Only uncomment the sections relevant to your cloud provider and           ║
+# ║  catalog types.                                                            ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+# ┌────────────────────────────────────────────────────────────────────────────┐
+# │ REQUIRED FOR ALL DEPLOYMENTS                                               │
+# └────────────────────────────────────────────────────────────────────────────┘
+
 confluent_cloud_api_key    = "YOUR_CONFLUENT_CLOUD_API_KEY"
-# Your Confluent Cloud API Secret. This can be generated in the Confluent Cloud UI.
 confluent_cloud_api_secret = "YOUR_CONFLUENT_CLOUD_API_SECRET"
+environment_display_name   = "Tableflow Demo"
 
-# Environment Display Names
-# A user-friendly name for your Confluent Cloud environment.
-environment_display_name = "YOUR_ENVIRONMENT_DISPLAY_NAME"
+# Cloud provider: "aws" or "azure"
+cloud_provider = "aws"
 
-# ============================================
-# Cloud Provider Configuration
-# ============================================
-# Choose your cloud provider: "aws" or "azure"
-# Default: "aws" (for backward compatibility)
-cloud_provider = "aws" # Options: "aws", "azure"
+# Region (AWS format: "us-east-1" | Azure format: "eastus")
+region = "us-east-1"
 
-# A list of catalog types that will be used.
-# AWS-only: "glue"
-# Azure-only: "fabric"
-# Both clouds: "databricks", "snowflake"
-catalog_types = ["databricks", "snowflake", "glue"] # Customize based on cloud_provider
+# Catalog integrations to enable. Pick from the table below:
+#
+#   ┌──────────────┬───────────────────────────────────────────────────────────┐
+#   │ Catalog Type │ Supported Cloud Providers                               │
+#   ├──────────────┼───────────────────────────────────────────────────────────┤
+#   │ "databricks" │ AWS, Azure                                              │
+#   │ "snowflake"  │ AWS, Azure                                              │
+#   │ "glue"       │ AWS only                                                │
+#   └──────────────┴───────────────────────────────────────────────────────────┘
+#
+# Examples:
+#   AWS:   catalog_types = ["databricks", "snowflake", "glue"]
+#   Azure: catalog_types = ["databricks", "snowflake"]
 
-# Region Configuration
-# For AWS: use format like "us-east-1", "eu-west-2"
-# For Azure: use format like "eastus", "westus2"
-region = "us-east-1" # Change to appropriate region for your cloud provider
+catalog_types = ["databricks"]
 
-# Snowflake Configuration
-# The endpoint URL for your Snowflake account.
-snowflake_endpoint      = "https://YOUR_SNOWFLAKE_ACCOUNT_IDENTIFIER.YOUR_REGION.snowflakecomputing.com"
-# The name of the Snowflake warehouse to be used.
-snowflake_warehouse     = "YOUR_SNOWFLAKE_WAREHOUSE_NAME"
-# The allowed scope for the Snowflake principal role, typically in the format "PRINCIPAL_ROLE:your_role_name".
-snowflake_allowed_scope = "PRINCIPAL_ROLE:YOUR_SNOWFLAKE_PRINCIPAL_ROLE"
 
-# Polaris Configuration
-# Your Polaris Client ID. Obtain this from your Polaris account settings.
-polaris_client_id     = "YOUR_POLARIS_CLIENT_ID"
-# Your Polaris Client Secret. Obtain this from your Polaris account settings.
-polaris_client_secret = "YOUR_POLARIS_CLIENT_SECRET"
-# Your Polaris account name.
-polaris_account_name  = "YOUR_POLARIS_ACCOUNT_NAME"
-# The username for your Polaris account.
-polaris_username      = "YOUR_POLARIS_USERNAME"
-# The password for your Polaris account.
-polaris_password      = "YOUR_POLARIS_PASSWORD"
-# The AWS region where your Polaris instance is deployed (e.g., "us-east-1").
-polaris_region        = "YOUR_POLARIS_REGION"
+# ┌────────────────────────────────────────────────────────────────────────────┐
+# │ AWS-SPECIFIC (Required when cloud_provider = "aws")                        │
+# │                                                                            │
+# │ No additional variables needed. AWS credentials are read from your         │
+# │ AWS CLI configuration (run: aws configure).                                │
+# └────────────────────────────────────────────────────────────────────────────┘
 
-# ============================================
-# AWS-Specific Configuration (if cloud_provider = "aws")
-# ============================================
-# DEPRECATED: Use 'region' instead. Kept for backward compatibility.
-# aws_region = "YOUR_AWS_REGION"
 
-# Databricks Configuration
-# The ID of your Databricks workspace. Found in the Databricks URL (e.g., after '?o=').
-databricks_workspace_id = "YOUR_DATABRICKS_WORKSPACE_ID"
-# The name of your Databricks workspace.
-databricks_workspace_name = "YOUR_DATABRICKS_WORKSPACE_NAME"
-# The account ID associated with your Databricks account.
-databricks_account_id = "YOUR_DATABRICKS_ACCOUNT_ID"
-# The host URL for your Databricks workspace.
-databricks_host = "https://YOUR_DATABRICKS_HOST_URL"
-# A Databricks personal access token. Generate this in your Databricks user settings.
-databricks_token = "YOUR_DATABRICKS_PERSONAL_ACCESS_TOKEN"
-# The name of the Databricks SQL Warehouse to connect to.
-databricks_sql_warehouse_name = "YOUR_DATABRICKS_SQL_WAREHOUSE_NAME"
-databricks_client_id = "YOUR_DATABRICKS_CLIENT_ID"
+# ┌────────────────────────────────────────────────────────────────────────────┐
+# │ AZURE-SPECIFIC (Required when cloud_provider = "azure")                    │
+# │                                                                            │
+# │ Uncomment and fill in these values if using Azure.                         │
+# │ Azure CLI must be configured (run: az login).                              │
+# └────────────────────────────────────────────────────────────────────────────┘
 
-# ============================================
-# Azure-Specific Configuration (if cloud_provider = "azure")
-# ============================================
-# Azure Subscription ID (found in Azure Portal)
-# Only required if cloud_provider = "azure"
-azure_subscription_id = "YOUR_AZURE_SUBSCRIPTION_ID"
+# azure_subscription_id             = "your-azure-subscription-id"
+# azure_tenant_id                   = "your-azure-tenant-id"
+# azure_resource_group_name         = "tableflow-rg"          # Must exist already
+# azure_storage_account_name_prefix = "cflttflow"             # 3-15 lowercase alphanumeric
 
-# Azure Tenant ID (found in Azure Active Directory)
-# Only required if cloud_provider = "azure"
-# Can be auto-detected if you're logged in via 'az login'
-azure_tenant_id = "YOUR_AZURE_TENANT_ID"
 
-# Azure Resource Group name for storage resources
-# Only used if cloud_provider = "azure"
-azure_resource_group_name = "tableflow-rg"
+# ┌────────────────────────────────────────────────────────────────────────────┐
+# │ DATABRICKS (Required when "databricks" is in catalog_types)                │
+# │                                                                            │
+# │ ► AZURE: No Databricks variables needed! The project auto-provisions:      │
+# │   - Databricks workspace                                                  │
+# │   - Unity Catalog metastore                                               │
+# │   - Access connector with managed identity                                │
+# │   - Service principal with OAuth M2M secret                               │
+# │   - SQL warehouse                                                         │
+# │   - Storage credential, external location, catalog, and grants            │
+# │                                                                            │
+# │   After terraform apply, retrieve Tableflow integration credentials:       │
+# │     terraform output azure_databricks_workspace_url  # Host               │
+# │     terraform output databricks_sp_client_id         # Client ID          │
+# │     terraform output databricks_oauth_secret         # Client Secret      │
+# │     terraform output databricks_catalog_name         # Catalog            │
+# │                                                                            │
+# │ ► AWS: Requires an existing Databricks workspace. Uncomment and fill:      │
+# └────────────────────────────────────────────────────────────────────────────┘
 
-# Azure Storage Account name prefix (3-15 lowercase alphanumeric chars)
-# Must be globally unique across all Azure
-# Only used if cloud_provider = "azure"
-azure_storage_account_name_prefix = "cflttflow"
+# --- AWS Databricks (existing workspace) ---
+# databricks_host               = "https://your-workspace.cloud.databricks.com"
+# databricks_token              = "your-personal-access-token"
+# databricks_workspace_id       = "1234567890"
+# databricks_workspace_name     = "your-workspace-name"
+# databricks_account_id         = "your-account-uuid"
+# databricks_sql_warehouse_name = "your-sql-warehouse"
+# databricks_client_id          = "your-oauth-client-id"
+
+# --- Azure Databricks (advanced - only if using a pre-existing workspace) ---
+# databricks_workspace_url      = "https://adb-xxxxx.xx.azuredatabricks.net"
+# databricks_workspace_id       = "1234567890"
+# databricks_metastore_id       = "existing-metastore-uuid"   # Skip metastore creation
+
+
+# ┌────────────────────────────────────────────────────────────────────────────┐
+# │ SNOWFLAKE (Required when "snowflake" is in catalog_types)                  │
+# │                                                                            │
+# │ Works with both AWS and Azure deployments.                                 │
+# │ Uncomment and fill in if using Snowflake catalog integration.              │
+# └────────────────────────────────────────────────────────────────────────────┘
+
+# snowflake_endpoint      = "https://YOUR_ACCOUNT.YOUR_REGION.snowflakecomputing.com"
+# snowflake_warehouse     = "YOUR_WAREHOUSE_NAME"
+# snowflake_allowed_scope = "PRINCIPAL_ROLE:YOUR_ROLE"
+
+# --- Polaris / Snowflake Open Data (used by Snowflake catalog integration) ---
+# polaris_client_id     = "your-polaris-client-id"
+# polaris_client_secret = "your-polaris-client-secret"
+# polaris_account_name  = "your-polaris-account-name"
+# polaris_username      = "your-polaris-username"
+# polaris_password      = "your-polaris-password"
+# polaris_region        = "us-east-1"
+
+
+# ┌────────────────────────────────────────────────────────────────────────────┐
+# │ GLUE (Required when "glue" is in catalog_types)                            │
+# │                                                                            │
+# │ AWS only. No additional variables needed beyond AWS credentials.           │
+# │ The Glue catalog database and IAM permissions are auto-provisioned.        │
+# └────────────────────────────────────────────────────────────────────────────┘
+
 

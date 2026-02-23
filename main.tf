@@ -161,6 +161,79 @@ module "azure_adls_container" {
   random_suffix          = random_integer.suffix.result
 }
 
+# Azure Databricks Workspace (CONDITIONAL - only if no workspace URL provided)
+module "azure_databricks_workspace" {
+  count = local.should_provision_workspace ? 1 : 0
+
+  source = "./modules/azure_databricks_workspace"
+
+  workspace_name_suffix = "tableflow-${random_integer.suffix.result}"
+  resource_group_name   = var.azure_resource_group_name
+  region                = local.effective_region
+
+  depends_on = [module.azure_adls_container]
+}
+
+# Azure Databricks Unity Catalog Metastore
+module "azure_databricks_metastore" {
+  count = local.is_azure && contains(var.catalog_types, "databricks") ? 1 : 0
+
+  source = "./modules/azure_databricks_metastore"
+
+  providers = {
+    databricks.workspace = databricks.workspace
+  }
+
+  # Use effective workspace ID (auto-provisioned or user-provided)
+  workspace_id          = local.effective_workspace_id
+  workspace_resource_id = local.effective_workspace_resource_id # null for pre-existing
+  databricks_account_id = var.databricks_account_id
+
+  # Existing metastore configuration (optional - for shared accounts)
+  existing_metastore_id = var.databricks_metastore_id
+
+  # Skip metastore assignment if user lacks permissions (for shared accounts)
+  skip_metastore_assignment = var.databricks_skip_metastore_assignment
+
+  # Storage configuration
+  storage_account_name = module.azure_adls_container["databricks"].storage_account_name
+  container_name       = module.azure_adls_container["databricks"].container_name
+
+  # Access Connector (preferred) or Service Principal credentials
+  azure_access_connector_id = length(module.azure_databricks_access_connector) > 0 ? module.azure_databricks_access_connector[0].access_connector_id : null
+  azure_tenant_id           = var.azure_tenant_id
+  azure_application_id      = length(module.azure_databricks_access_connector) > 0 ? null : module.azure_service_principal["databricks"].databricks_client_id
+  azure_client_secret       = length(module.azure_databricks_access_connector) > 0 ? null : module.azure_service_principal["databricks"].databricks_client_secret
+
+  # SQL Warehouse configuration
+  create_sql_warehouse = local.should_provision_workspace # Only create for auto-provisioned workspaces
+  sql_warehouse_name   = var.databricks_sql_warehouse_name
+
+  region        = local.effective_region
+  random_suffix = random_integer.suffix.result
+
+  depends_on = [
+    module.azure_databricks_workspace,
+    module.azure_databricks_access_connector,
+    module.azure_service_principal,
+    module.azure_adls_container
+  ]
+}
+
+
+# Azure Databricks Access Connector (managed identity for storage credential)
+module "azure_databricks_access_connector" {
+  count = local.is_azure && contains(var.catalog_types, "databricks") ? 1 : 0
+
+  source = "./modules/azure_databricks_access_connector"
+
+  resource_group_name = var.azure_resource_group_name
+  region              = local.effective_region
+  name_suffix         = random_integer.suffix.result
+  storage_account_id  = module.azure_adls_container["databricks"].storage_account_id
+
+  depends_on = [module.azure_adls_container]
+}
 
 locals {
   # Storage resource names (S3 bucket or ADLS container)
@@ -226,11 +299,11 @@ module "aws_iam_role" {
 # Azure Service Principals (conditional - only for Azure)
 # Creates service principal for Confluent's multi-tenant application
 module "azure_service_principal" {
-  for_each                       = local.is_azure ? module.kafka_clusters : {}
-  source                         = "./modules/azure_service_principal"
-  catalog_name                   = each.key
-  storage_account_id             = module.azure_adls_container[each.key].storage_account_id
-  confluent_multi_tenant_app_id  = module.provider_integration[each.key].azure_confluent_multi_tenant_app_id
+  for_each                      = local.is_azure ? module.kafka_clusters : {}
+  source                        = "./modules/azure_service_principal"
+  catalog_name                  = each.key
+  storage_account_id            = module.azure_adls_container[each.key].storage_account_id
+  confluent_multi_tenant_app_id = module.provider_integration[each.key].azure_confluent_multi_tenant_app_id
 
   depends_on = [
     module.provider_integration
@@ -240,11 +313,11 @@ module "azure_service_principal" {
 # Azure Confluent Multi-Tenant Service Principal Permissions (conditional - only for Azure)
 # Grants Confluent service principal permissions to access storage
 module "azure_confluent_sp_permissions" {
-  for_each                                = local.is_azure ? module.kafka_clusters : {}
-  source                                  = "./modules/azure_confluent_sp_permissions"
-  confluent_service_principal_object_id   = module.azure_service_principal[each.key].confluent_service_principal_object_id
-  storage_account_id                      = module.azure_adls_container[each.key].storage_account_id
-  resource_group_id                       = module.azure_adls_container[each.key].resource_group_id
+  for_each                              = local.is_azure ? module.kafka_clusters : {}
+  source                                = "./modules/azure_confluent_sp_permissions"
+  confluent_service_principal_object_id = module.azure_service_principal[each.key].confluent_service_principal_object_id
+  storage_account_id                    = module.azure_adls_container[each.key].storage_account_id
+  resource_group_id                     = module.azure_adls_container[each.key].resource_group_id
 
   depends_on = [
     module.provider_integration,
@@ -304,20 +377,6 @@ module "glue_catalog_integration" {
   tableflow_api_secret             = module.tableflow_api_key.api_secret
 }
 
-# Microsoft Fabric catalog integration (only if "fabric" is in catalog_types AND cloud_provider is Azure)
-module "fabric_catalog_integration" {
-  count = local.is_azure && contains(var.catalog_types, "fabric") ? 1 : 0
-
-  source                           = "./modules/fabric_catalog_integration"
-  environment_id                   = module.confluent_env_module.environment_id
-  catalog_type                     = "fabric"
-  cluster_id                       = module.kafka_clusters["fabric"].cluster_id
-  provider_integration_internal_id = module.provider_integration["fabric"].provider_integration_internal_id
-  tableflow_api_key                = module.tableflow_api_key.api_key
-  tableflow_api_secret             = module.tableflow_api_key.api_secret
-  azure_tenant_id                  = var.azure_tenant_id
-}
-
 # catalog integration (only if "snowflake" is in catalog_types)
 module "snowflake_catalog_integration" {
   count = contains(var.catalog_types, "snowflake") ? 1 : 0
@@ -346,7 +405,11 @@ module "flink_compute_pool" {
 module "databricks_external_table" {
   count = contains(var.catalog_types, "databricks") ? 1 : 0
 
-  source                  = "./modules/databricks_external_table"
+  source = "./modules/databricks_external_table"
+
+  providers = {
+    databricks = databricks.workspace
+  }
   storage_credential_name = "tableflow-external-credential-${random_integer.suffix.result}"
   cloud_provider          = var.cloud_provider
 
@@ -357,21 +420,30 @@ module "databricks_external_table" {
   iam_policy_attachment_id = local.is_aws ? module.aws_iam_role["databricks"].iam_policy_attachment_id : ""
 
   # Azure-specific variables
-  azure_tenant_id      = local.is_azure ? var.azure_tenant_id : null
-  azure_application_id = local.is_azure ? module.azure_service_principal["databricks"].databricks_client_id : null
-  azure_client_secret  = local.is_azure ? module.azure_service_principal["databricks"].databricks_client_secret : null
-  container_name       = local.is_azure ? local.storage_names["databricks"] : null
-  storage_account_name = local.is_azure ? local.storage_account_names["databricks"] : null
+  azure_access_connector_id = local.is_azure ? module.azure_databricks_access_connector[0].access_connector_id : null
+  azure_tenant_id           = local.is_azure && !(length(module.azure_databricks_access_connector) > 0) ? var.azure_tenant_id : null
+  azure_application_id      = local.is_azure && !(length(module.azure_databricks_access_connector) > 0) ? module.azure_service_principal["databricks"].databricks_client_id : null
+  azure_client_secret       = local.is_azure && !(length(module.azure_databricks_access_connector) > 0) ? module.azure_service_principal["databricks"].databricks_client_secret : null
+  container_name            = local.is_azure ? local.storage_names["databricks"] : null
+  storage_account_name      = local.is_azure ? local.storage_account_names["databricks"] : null
 
-  external_location_name    = "tableflow-external-location-${random_integer.suffix.result}"
-  storage_location_name     = local.storage_names["databricks"]
-  catalog_type              = "databricks"
-  grant_principal           = var.databricks_client_id
-  shared_dir_path           = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
-  sql_warehouse_id          = data.databricks_sql_warehouse.my_existing_warehouse[0].id
-  query_display_name        = "Tableflow External Table Query ${random_integer.suffix.result}"
-  databricks_host           = var.databricks_host
-  databricks_token          = var.databricks_token
+  external_location_name = "tableflow-external-location-${random_integer.suffix.result}"
+  storage_location_name  = local.storage_names["databricks"]
+  catalog_type           = "databricks"
+  grant_principals = compact([
+    local.is_azure ? module.azure_service_principal["databricks"].databricks_client_id : null,
+    data.databricks_current_user.current_principal_from_workspace_provider[0].user_name
+  ])
+  databricks_sp_application_id = local.is_azure ? module.azure_service_principal["databricks"].databricks_client_id : null
+  shared_dir_path        = "/Workspace/Users/${data.databricks_current_user.current_principal_from_workspace_provider[0].user_name}/Queries"
+  sql_warehouse_id       = local.effective_sql_warehouse_id # Use effective SQL warehouse ID (auto-created or looked up)
+  query_display_name     = "Tableflow External Table Query ${random_integer.suffix.result}"
+  databricks_host        = var.databricks_host
+  databricks_token = coalesce(
+    var.databricks_workspace_token != null && var.databricks_workspace_token != "" ? var.databricks_workspace_token : null,
+    var.databricks_token != "NULL" && var.databricks_token != "" ? var.databricks_token : null,
+    "NULL" # Fallback for Azure auto-provision (doesn't use this module's token)
+  )
   confluent_organization_id = data.confluent_organization.current.id
   confluent_environment_id  = module.confluent_env_module.environment_id
   confluent_cluster_id      = module.kafka_clusters["databricks"].cluster_id
@@ -381,8 +453,11 @@ module "databricks_external_table" {
   depends_on = [
     module.aws_iam_role,
     module.azure_service_principal,
+    module.azure_databricks_access_connector,
     module.aws_s3_bucket,
     module.azure_adls_container,
+    module.azure_databricks_workspace,
+    module.azure_databricks_metastore,
     module.datagen_stock_trades["databricks"],
     module.datagen_users["databricks"]
   ]
